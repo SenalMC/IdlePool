@@ -1,0 +1,36 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Test and package
+        run: ./gradlew test validateIaAssets releaseBundle
+
+      - name: Upload release bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: IdlePool-release
+          path: build/distributions/IdlePool-*-release.zip
+          if-no-files-found: error

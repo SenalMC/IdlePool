@@ -1,0 +1,32 @@
+# Changelog
+
+## 1.0.0-rc.4
+
+- 新增 `/afkpool info` 插件信息与更新状态命令。
+- 启动时异步读取 GitHub `version.txt` 并比较本地版本。
+- 新版本可用时在后台和 info 输出中显示版本与下载地址。
+- 作者更新为 Chirnuo，并加入项目网站与联系邮箱。
+
+## 1.0.0-rc.3
+
+- 单个奖励新增 `trigger` 与 `unlock-after` 时间参数。
+- 支持连续挂机达到指定时间后才进入普通周期概率抽取。
+- 支持单次连续挂机里程碑奖励，同一方案可配置多个时间阶段。
+- 管理员奖励 GUI 可直接切换触发方式并编辑解锁/里程碑时间。
+
+## 1.0.0-rc.2
+
+- 玩家、管理员及暂存箱界面统一改为 Minecraft 原生箱子 GUI。
+- 移除会受客户端 GUI 缩放、字体和模组影响的三张 ItemsAdder 容器背景。
+- 保留 ItemsAdder 按钮、挂机币与 ActionBar 小图标。
+
+## 1.0.0-rc.1
+
+- 多区域挂机池与主动开始 GUI。
+- ActionBar 挂机状态显示。
+- SQLite 未满周期进度与默认七天保留。
+- 实物暂存箱、命令奖励和 Vault 货币奖励。
+- 原版、ItemsAdder、MythicMobs、MMOItems、Slimefun 与物品快照支持。
+- 游戏内挂机池和奖励方案管理员 GUI。
+- IdlePool 官方 ItemsAdder 配套内容包。
+- 初版容器背景、按钮、挂机币与 HUD 图标。

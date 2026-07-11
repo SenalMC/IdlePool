@@ -1,0 +1,23 @@
+reward-plans:
+  basic:
+    selection-mode: independent
+    rewards:
+      - type: item
+        provider: vanilla
+        id: DIAMOND
+        amount: 1
+        chance: 10.0
+        trigger: cycle
+        unlock-after: 30m
+      - type: item
+        provider: vanilla
+        id: GOLD_NUGGET
+        amount: 1
+        chance: 100.0
+        trigger: cycle
+        unlock-after: 0s
+      - type: command
+        command: "say {player} 连续挂机已满一小时"
+        chance: 100.0
+        trigger: session-milestone
+        unlock-after: 1h

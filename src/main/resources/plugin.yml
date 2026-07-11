@@ -1,0 +1,27 @@
+name: IdlePool
+version: '${version}'
+main: cn.guajichi.idlepool.IdlePoolPlugin
+description: Region-based AFK rewards with native chest GUIs and optional ItemsAdder icons.
+api-version: '1.21'
+author: Chirnuo
+email: mc@mc.email.cn
+website: https://github.com/SenalMC
+license: Apache-2.0
+softdepend:
+  - ItemsAdder
+  - Vault
+  - MythicMobs
+  - MMOItems
+  - Slimefun
+commands:
+  afkpool:
+    description: Open or manage IdlePool.
+    usage: /afkpool [info|claim|stop|admin|doctor|reload]
+    aliases: [idlepool]
+permissions:
+  idlepool.use:
+    description: Use AFK pools.
+    default: true
+  idlepool.admin:
+    description: Manage IdlePool.
+    default: op

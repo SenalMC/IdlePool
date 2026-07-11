@@ -1,0 +1,57 @@
+info:
+  namespace: idlepool
+
+font_images:
+  clock:
+    path: font/icons/clock
+    scale_ratio: 9
+    y_position: 8
+    suggest_in_command: false
+  gift:
+    path: font/icons/gift
+    scale_ratio: 9
+    y_position: 8
+    suggest_in_command: false
+  coin:
+    path: font/icons/coin
+    scale_ratio: 9
+    y_position: 8
+    suggest_in_command: false
+
+items:
+  start_button:
+    display_name: "开始挂机"
+    lore:
+      - "点击后开始累计挂机时间"
+    resource:
+      material: LIME_DYE
+      generate: true
+      textures:
+        - item/start_button
+  info_button:
+    display_name: "挂机说明"
+    lore:
+      - "查看挂机池规则"
+    resource:
+      material: PAPER
+      generate: true
+      textures:
+        - item/info_button
+  rewards_button:
+    display_name: "奖励预览"
+    lore:
+      - "查看当前挂机池奖励方案"
+    resource:
+      material: CHEST
+      generate: true
+      textures:
+        - item/rewards_button
+  afk_coin:
+    display_name: "挂机币"
+    lore:
+      - "在挂机池中获得的纪念货币"
+    resource:
+      material: GOLD_NUGGET
+      generate: true
+      textures:
+        - item/afk_coin

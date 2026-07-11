@@ -1,0 +1,17 @@
+pools:
+  spawn:
+    enabled: false
+    display-name: "<gold>主城挂机池"
+    world: world
+    region:
+      min: { x: -10, y: 60, z: -10 }
+      max: { x: 10, y: 80, z: 10 }
+    permission: "idlepool.use"
+    max-active-players: 50
+    reward-cycle: 10m
+    progress-retention: 7d
+    reward-plan: basic
+    gui:
+      start-item: "idlepool:start_button"
+      info-item: "idlepool:info_button"
+      rewards-item: "idlepool:rewards_button"
