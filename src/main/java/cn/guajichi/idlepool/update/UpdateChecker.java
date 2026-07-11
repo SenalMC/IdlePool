@@ -89,6 +89,7 @@ public final class UpdateChecker {
                         + "，当前版本 " + currentVersion() + "。下载：" + RELEASES_URL);
             } else {
                 result.set(new Result(State.UP_TO_DATE, remoteVersion, "已是最新版本"));
+                plugin.getLogger().info("IdlePool 更新检查完成：当前已是最新版本（" + remoteVersion + "）。");
             }
         } catch (IllegalArgumentException exception) {
             fail(exception.getMessage());
