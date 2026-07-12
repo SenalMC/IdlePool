@@ -3,8 +3,8 @@ plugins {
     id("com.gradleup.shadow") version "8.3.6"
 }
 
-group = "cn.guajichi"
-version = "1.0.0-rc.4"
+group = "top.cnuo"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -20,6 +20,7 @@ dependencies {
 
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.yaml:snakeyaml:2.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

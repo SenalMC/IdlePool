@@ -1,6 +1,9 @@
+# IdlePool 可选 ItemsAdder 图标包；插件核心 GUI 仍是原版箱子界面。
+# Optional IdlePool ItemsAdder icon pack; the core GUI remains a vanilla chest inventory.
 info:
   namespace: idlepool
 
+# ActionBar 小图标；ActionBar font icons.
 font_images:
   clock:
     path: font/icons/clock
@@ -18,6 +21,8 @@ font_images:
     y_position: 8
     suggest_in_command: false
 
+# GUI 按钮图标；不可用时插件会使用原版物品。
+# GUI button icons; the plugin falls back to vanilla items when unavailable.
 items:
   start_button:
     display_name: "开始挂机"

@@ -1,0 +1,243 @@
+# IdlePool 默认简体中文语言文件。
+# IdlePool default Simplified Chinese language file.
+# 支持 MiniMessage 格式；请保留 {placeholder} 形式的变量。
+# MiniMessage formatting is supported; keep variables written as {placeholder}.
+
+common:
+  enabled: "启用"
+  disabled: "停用"
+
+actionbar:
+  format: ":clock: <yellow>挂机 <white>{session_time}  :gift: <yellow>下次奖励 <white>{next_reward}  :coin: <green>本次 {earned}"
+
+session:
+  no-pool: "<gold>[挂机池]</gold> <red>你当前不在挂机池区域内。"
+  no-permission: "<gold>[挂机池]</gold> <red>你没有使用这个挂机池的权限。"
+  already-active: "<gold>[挂机池]</gold> <yellow>你已经在挂机了。"
+  pool-full: "<gold>[挂机池]</gold> <red>这个挂机池已达到人数上限。"
+  started: "<gold>[挂机池]</gold> <green>已开始在 <white>{pool}</white> 挂机。"
+  stopped: "<gold>[挂机池]</gold> <yellow>挂机已结束，本次挂机 {session_time}。"
+  left-region: "<gold>[挂机池]</gold> <yellow>你离开了挂机池，进度已保存。"
+  progress-loading: "<gold>[挂机池]</gold> <gray>正在读取你的挂机进度……"
+  milestone-reached: "<gold>[挂机池]</gold> <green>连续挂机达到 <white>{time}</white>，里程碑奖励已结算，本次获得 <white>{earned}</white> 项。"
+
+command:
+  no-permission: "<red>你没有权限执行这个命令。"
+  players-only: "<red>只有玩家可以使用这个命令。"
+  reload-success: "<green>IdlePool 配置与语言文件已重载。"
+
+itemsadder:
+  status:
+    ready: "正常（资源已加载）"
+    waiting: "已安装，正在等待资源数据加载"
+    not-installed: "未安装"
+    error: "错误：{error}"
+
+update:
+  disabled: "管理员已关闭更新检查"
+  checking: "正在检查"
+  invalid-url: "更新地址无效"
+  request-failed: "网络请求失败：{error}"
+  http-error: "GitHub 返回 HTTP {status}"
+  invalid-version: "version.txt 中的版本号格式无效"
+  available: "检测到新版本"
+  up-to-date: "已是最新版本"
+  compare-failed: "版本比较失败：{error}"
+
+# /afkpool info 输出。
+# Output of /afkpool info.
+info:
+  header: "<gold>===IdlePool信息==="
+  version: "<yellow>版本：<white>{version}"
+  server-version: "<yellow>服务端版本：<white>{version}"
+  itemsadder-status: "<yellow>ItemsAdder状态：<white>{status}"
+  project-url: "<aqua><click:open_url:'{url}'>{url}</click>"
+  footer: "<gold>===IdlePool@Chirnuo==="
+  update-available: "<yellow>发现新版本：<green>{version}"
+  current-version: "<gray>当前版本：<white>{version}"
+  update-url: "<aqua>更新地址：<click:open_url:'{url}'>{url}</click>"
+  up-to-date: "<green>当前已是最新版本（{version}）。"
+  update-error: "<red>更新检查失败：{error}"
+  checking: "<gray>正在检查更新，请稍后再次查看。"
+  disabled: "<gray>更新检查已在配置中关闭。"
+  not-checked: "<gray>尚未执行更新检查。"
+
+doctor:
+  header: "<gold>=== IdlePool 配置检查 ==="
+  no-pools: "<red>✘ 未加载任何挂机池。"
+  pools-loaded: "<green>✔ 已加载 {count} 个挂机池。"
+  no-enabled-pools: "<yellow>⚠ 没有已启用的挂机池。"
+  enabled-pools: "<green>✔ 已启用 {count} 个挂机池。"
+  missing-plan: "<red>✘ 挂机池 {pool} 引用了不存在的奖励方案 {plan}。"
+  itemsadder-ready: "<green>✔ ItemsAdder 可用。"
+  itemsadder-unavailable: "<yellow>⚠ ItemsAdder 不可用，将使用原版图标。"
+  empty-plan: "<yellow>⚠ 奖励方案 {plan} 没有奖励。"
+  money-without-vault: "<yellow>⚠ 奖励方案 {plan} 包含货币奖励，但 Vault 经济不可用。"
+  invalid-vanilla-item: "<red>✘ 奖励方案 {plan} 的原版物品无效：{item}。"
+  provider-missing: "<yellow>⚠ 奖励方案 {plan} 使用 {provider}，但插件 {plugin} 未启用。"
+  itemsadder-item-missing: "<red>✘ ItemsAdder 物品不存在：{item}。"
+  separator: "<gray>-------------------------"
+  success: "<green>检查完成：无错误，{warnings} 个警告。"
+  failure: "<red>检查完成：发现 {errors} 个错误。"
+
+gui:
+  pool:
+    info:
+      name: "<aqua>挂机池信息"
+      lore:
+        - "<gray>在区域内开始挂机以累计时长。"
+        - "<gray>未满周期的进度会按配置保留。"
+    start:
+      name: "<green>开始挂机"
+      lore: ["<yellow>点击开始获取奖励。"]
+    stop:
+      name: "<red>结束挂机"
+      lore: ["<yellow>点击停止并保存当前进度。"]
+    rewards:
+      name: "<gold>奖励方案"
+      lore:
+        - "<gray>当前方案：<white>{plan}"
+        - "<gray>物品奖励将进入暂存箱。"
+
+inbox:
+  title: "<gold>挂机奖励暂存箱"
+  loading: "<gray>正在读取暂存箱……"
+  load-failed: "<red>暂存箱读取失败，请稍后重试。"
+  generate-failed: "<red>无法生成物品 {provider}:{item}，请联系管理员。"
+  inventory-full: "<yellow>背包空间不足，物品仍保留在暂存箱。"
+  update-failed: "<red>奖励领取状态保存失败，请联系管理员核对。"
+  claimed: "<green>已领取 {amount} 个物品。"
+  status:
+    name: "<gold>暂存箱状态"
+    lore:
+      - "<gray>当前显示：<white>{count} 项"
+      - "<yellow>点击奖励即可领取。"
+  item:
+    lore:
+      - "<gray>数量：<white>{amount}"
+      - "<gray>来源：<white>{provider}"
+      - "<gray>挂机池：<white>{pool}"
+      - ""
+      - "<yellow>点击领取"
+
+# 游戏内管理员 GUI 与聊天输入。
+# In-game administrator GUI and chat input.
+admin:
+  input:
+    prompt: "<gold>[挂机池]</gold> {prompt}；输入 <red>cancel</red> 取消。"
+    retry: "请重新输入"
+    invalid: "<red>输入无效：</red>{error}"
+  save-failed: "<red>保存失败：</red>{error}"
+  error:
+    invalid-text: "文本长度不合法"
+    invalid-duration: "时间格式无效，请使用 30m、2h 或 7d 等格式"
+    negative-number: "数字不能小于 0"
+    pool-id: "ID 格式不正确或已经存在"
+    pool-exists: "挂机池 ID 已存在"
+    plan-exists: "奖励方案 ID 已存在"
+    plan-missing: "奖励方案不存在：{plan}"
+    reward-index: "奖励索引已经失效"
+    invalid-id: "ID 只能包含小写字母、数字、_ 和 -，最长 32 位"
+    invalid-command: "命令不能为空且不能超过 512 个字符"
+    invalid-amount: "数量必须在 1～1000000 之间"
+    invalid-money: "金额必须大于 0 且不超过 10 亿"
+    invalid-chance: "概率必须在 0～100 之间"
+    reward-missing: "奖励已经不存在"
+    milestone-zero: "单次挂机里程碑时间必须大于 0"
+    provider-format: "格式应为 provider:item_id"
+    unsupported-provider: "不支持的物品来源：{provider}"
+  pool:
+    saving: "<gray>正在保存挂机池配置……"
+    prompt:
+      create: "请输入新挂机池 ID，只能使用小写字母、数字、_ 和 -"
+      cycle: "请输入奖励周期，例如 10m"
+      permission: "请输入权限节点"
+      plan: "请输入奖励方案 ID"
+      maximum: "请输入最大人数，0 表示不限"
+      retention: "请输入进度保留时间，例如 7d"
+    list:
+      title: "<gold>挂机池管理"
+      entry-lore:
+        - "<gray>ID：<white>{id}"
+        - "<gray>状态：<white>{status}"
+        - "<gray>周期：<white>{cycle}"
+        - ""
+        - "<yellow>点击编辑"
+      reload:
+        name: "<green>重载配置"
+        lore: ["<gray>重新读取所有配置文件。"]
+      create:
+        name: "<green>创建挂机池"
+        lore: ["<gray>以当前位置创建一个新的挂机池。"]
+      rewards:
+        name: "<green>奖励方案管理"
+        lore: ["<gray>创建和编辑物品、货币及命令奖励。"]
+    detail:
+      title: "<gold>编辑：{id}"
+      enabled: { name: "<green>已启用", lore: ["<yellow>点击切换状态"] }
+      disabled: { name: "<red>已停用", lore: ["<yellow>点击切换状态"] }
+      point-one: { name: "<red>设置区域点 1", lore: ["<gray>设置为你当前站立的方块。"] }
+      point-two: { name: "<aqua>设置区域点 2", lore: ["<gray>设置为你当前站立的方块。"] }
+      cycle: { name: "<yellow>奖励周期", lore: ["<gray>当前：<white>{value}", "<yellow>点击后在聊天输入，例如 10m"] }
+      permission: { name: "<yellow>使用权限", lore: ["<gray>当前：<white>{value}", "<yellow>点击修改"] }
+      plan: { name: "<yellow>奖励方案", lore: ["<gray>当前：<white>{value}", "<yellow>点击修改"] }
+      maximum: { name: "<yellow>最大挂机人数", lore: ["<gray>当前：<white>{value}", "<yellow>点击修改，0 表示不限"] }
+      retention: { name: "<yellow>进度保留时间", lore: ["<gray>当前：<white>{value}", "<yellow>点击后输入，例如 7d"] }
+      back: { name: "<yellow>返回", lore: [] }
+  reward:
+    saving: "<gray>正在保存奖励配置……"
+    no-held-item: "<red>请先在主手拿着要添加的物品。"
+    identified: "<gray>已识别物品来源：<white>{provider}"
+    label:
+      cycle: "周期抽取"
+      milestone: "单次挂机里程碑"
+      immediate: "立即"
+    prompt:
+      create-plan: "请输入新奖励方案 ID"
+      add-command: "请输入控制台命令，不需要开头的 /"
+      add-money: "请输入 Vault 货币数量"
+      add-item-id: "请输入 provider:item_id，例如 mythicmobs:SKELETON_SWORD"
+      item-amount: "请输入物品数量，必须大于 0"
+      money-amount: "请输入货币数量，必须大于 0"
+      edit-command: "请输入新的控制台命令"
+      chance: "请输入触发概率 0～100"
+      unlock-cycle: "请输入概率解锁时间，例如 30m；输入 0 表示立即参与"
+      unlock-milestone: "请输入单次挂机里程碑时间，例如 30m 或 2h"
+    list:
+      title: "<gold>奖励方案管理"
+      entry:
+        name: "<yellow>{id}"
+        lore: ["<gray>奖励数量：<white>{count}", "<gray>抽取模式：<white>独立概率", "", "<yellow>点击编辑"]
+      create: { name: "<green>创建奖励方案", lore: ["<gray>创建一个空的独立概率奖池。"] }
+      back: { name: "<yellow>返回挂机池管理", lore: [] }
+    plan:
+      title: "<gold>奖励方案：{id}"
+      add-held: { name: "<green>添加手持物品", lore: ["<gray>自动识别原版、IA、MMOItems、Slimefun。", "<gray>无法稳定识别时自动保存完整快照。"] }
+      add-command: { name: "<green>添加命令奖励", lore: ["<gray>点击后在聊天输入控制台命令。"] }
+      add-money: { name: "<green>添加 Vault 货币", lore: ["<gray>点击后输入货币数量。"] }
+      add-id: { name: "<green>通过物品 ID 添加", lore: ["<gray>适合需要指定模板 ID 的物品。", "<gray>格式：provider:item_id"] }
+      back: { name: "<yellow>返回方案列表", lore: [] }
+    detail:
+      title: "<gold>编辑奖励 #{index}"
+      amount: { name: "<yellow>数量：{value}", lore: ["<gray>点击修改。"] }
+      money: { name: "<yellow>金额：{value}", lore: ["<gray>点击修改。"] }
+      command: { name: "<yellow>编辑命令", lore: ["<gray>当前：<white>{value}", "<gray>点击修改。"] }
+      chance: { name: "<yellow>概率：{value}%", lore: ["<gray>点击输入 0～100。"] }
+      trigger-cycle: { name: "<yellow>触发方式：{value}", lore: ["<gray>解锁后参与每个普通周期抽取。", "<yellow>点击切换为单次挂机里程碑。"] }
+      trigger-milestone: { name: "<yellow>触发方式：{value}", lore: ["<gray>本次连续挂机到达时间时仅结算一次。", "<yellow>点击切换为普通周期抽取。"] }
+      unlock-cycle: { name: "<yellow>概率解锁时间：{value}", lore: ["<gray>在此之前不会进入周期抽取。", "<yellow>点击输入，例如 30m、2h 或 0"] }
+      unlock-milestone: { name: "<yellow>里程碑时间：{value}", lore: ["<gray>连续挂机跨过此时间时额外结算。", "<yellow>点击输入，例如 30m、2h"] }
+      delete: { name: "<red>删除奖励", lore: ["<gray>点击后需要再次确认。"] }
+      back: { name: "<yellow>返回奖励方案", lore: [] }
+    delete:
+      title: "<red>确认删除奖励？"
+      confirm: { name: "<green>确认删除", lore: ["<red>此操作不可撤销。"] }
+      cancel: { name: "<yellow>取消", lore: [] }
+    icon:
+      item-name: "<yellow>{provider}:{id}"
+      money-name: "<gold>Vault 货币 ×{amount}"
+      command-name: "<aqua>命令奖励"
+      lore: ["<gray>序号：<white>{index}", "<gray>概率：<white>{chance}%", "<gray>触发：<white>{trigger}", "<gray>时间：<white>{time}"]
+      item-amount: "<gray>数量：<white>{amount}"
+      command: "<gray>命令：<white>{command}"
+      footer: ["", "<yellow>点击编辑"]

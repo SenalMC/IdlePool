@@ -1,6 +1,12 @@
 # Changelog
 
-## 1.0.0-rc.4
+## 1.0.0
+
+- 正式版包名迁移至 `top.cnuo.idlepool`。
+- 新增 `message.yml` 默认中文语言包与完整 `en.yml` 英文语言包。
+- 所有玩家消息、命令反馈、GUI 标题、按钮和 Lore 均可配置。
+- 新增 `inbox.open-on-stop`，结束挂机后可自动打开暂存箱。
+- 所有示例 YAML 配置补充中英双语注释。
 
 - 新增 `/afkpool info` 插件信息与更新状态命令。
 - 启动时异步读取 GitHub `version.txt` 并比较本地版本。

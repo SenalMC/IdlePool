@@ -2,7 +2,7 @@
 
 ## 文件安装
 
-- [ ] 将 `plugins/IdlePool-1.0.0-rc.4.jar` 放入服务端 `plugins`。
+- [ ] 将 `plugins/IdlePool-1.0.0.jar` 放入服务端 `plugins`。
 - [ ] 如需 IA 图标，将 `ItemsAdder/contents/idlepool` 放入 `plugins/ItemsAdder/contents`。
 - [ ] 从 rc.1 升级且继续使用 IA 时，删除 `contents/idlepool/textures/font/gui` 旧背景目录，或使用 `install.ps1`。
 - [ ] 如需 IA 图标或 IA 奖励物品，安装与服务端版本兼容的 ItemsAdder 4.x。
@@ -44,4 +44,4 @@
 - [ ] 备份 `plugins/IdlePool/data.db`。
 - [ ] 保存当前 ItemsAdder 生成资源包的 SHA-1。
 
-建议先让少量玩家进行 24 小时灰度测试，再把 `1.0.0-rc.4` 标记为正式 `1.0.0`。
+建议正式发布前先让少量玩家进行 24 小时灰度测试，并保留配置与数据库备份。

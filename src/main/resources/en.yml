@@ -1,0 +1,198 @@
+# IdlePool English language file.
+# IdlePool 英文语言文件。
+# MiniMessage formatting is supported; keep variables written as {placeholder}.
+# 支持 MiniMessage 格式；请保留 {placeholder} 形式的变量。
+
+common:
+  enabled: "Enabled"
+  disabled: "Disabled"
+actionbar:
+  format: ":clock: <yellow>AFK <white>{session_time}  :gift: <yellow>Next <white>{next_reward}  :coin: <green>Earned {earned}"
+session:
+  no-pool: "<gold>[IdlePool]</gold> <red>You are not inside an AFK pool."
+  no-permission: "<gold>[IdlePool]</gold> <red>You cannot use this AFK pool."
+  already-active: "<gold>[IdlePool]</gold> <yellow>You are already AFK."
+  pool-full: "<gold>[IdlePool]</gold> <red>This AFK pool is full."
+  started: "<gold>[IdlePool]</gold> <green>AFK session started in <white>{pool}</white>."
+  stopped: "<gold>[IdlePool]</gold> <yellow>AFK session stopped after {session_time}."
+  left-region: "<gold>[IdlePool]</gold> <yellow>You left the AFK pool. Your progress was saved."
+  progress-loading: "<gold>[IdlePool]</gold> <gray>Loading your AFK progress…"
+  milestone-reached: "<gold>[IdlePool]</gold> <green>Reached {time}; milestone rewards settled ({earned} granted)."
+command:
+  no-permission: "<red>You do not have permission to use this command."
+  players-only: "<red>Only players can use this command."
+  reload-success: "<green>IdlePool configuration and messages reloaded."
+itemsadder:
+  status:
+    ready: "Ready (resources loaded)"
+    waiting: "Installed; waiting for resource data"
+    not-installed: "Not installed"
+    error: "Error: {error}"
+update:
+  disabled: "Update checks were disabled by an administrator"
+  checking: "Checking"
+  invalid-url: "The update URL is invalid"
+  request-failed: "Network request failed: {error}"
+  http-error: "GitHub returned HTTP {status}"
+  invalid-version: "version.txt contains an invalid version"
+  available: "An update is available"
+  up-to-date: "Up to date"
+  compare-failed: "Version comparison failed: {error}"
+info:
+  header: "<gold>=== IdlePool Information ==="
+  version: "<yellow>Version: <white>{version}"
+  server-version: "<yellow>Server version: <white>{version}"
+  itemsadder-status: "<yellow>ItemsAdder status: <white>{status}"
+  project-url: "<aqua><click:open_url:'{url}'>{url}</click>"
+  footer: "<gold>=== IdlePool @ Chirnuo ==="
+  update-available: "<yellow>Update available: <green>{version}"
+  current-version: "<gray>Current version: <white>{version}"
+  update-url: "<aqua>Download: <click:open_url:'{url}'>{url}</click>"
+  up-to-date: "<green>You are running the latest version ({version})."
+  update-error: "<red>Update check failed: {error}"
+  checking: "<gray>Checking for updates. Try again shortly."
+  disabled: "<gray>Update checks are disabled."
+  not-checked: "<gray>No update check has run yet."
+doctor:
+  header: "<gold>=== IdlePool Configuration Check ==="
+  no-pools: "<red>✘ No AFK pools were loaded."
+  pools-loaded: "<green>✔ Loaded {count} AFK pool(s)."
+  no-enabled-pools: "<yellow>⚠ No AFK pools are enabled."
+  enabled-pools: "<green>✔ {count} AFK pool(s) enabled."
+  missing-plan: "<red>✘ Pool {pool} references missing reward plan {plan}."
+  itemsadder-ready: "<green>✔ ItemsAdder is available."
+  itemsadder-unavailable: "<yellow>⚠ ItemsAdder is unavailable; vanilla icons will be used."
+  empty-plan: "<yellow>⚠ Reward plan {plan} is empty."
+  money-without-vault: "<yellow>⚠ Plan {plan} contains money rewards, but Vault economy is unavailable."
+  invalid-vanilla-item: "<red>✘ Plan {plan} has an invalid vanilla item: {item}."
+  provider-missing: "<yellow>⚠ Plan {plan} uses {provider}, but {plugin} is disabled."
+  itemsadder-item-missing: "<red>✘ ItemsAdder item does not exist: {item}."
+  separator: "<gray>-------------------------"
+  success: "<green>Check complete: no errors, {warnings} warning(s)."
+  failure: "<red>Check complete: {errors} error(s)."
+gui:
+  pool:
+    info:
+      name: "<aqua>AFK Pool Information"
+      lore: ["<gray>Start an AFK session inside this region.", "<gray>Partial-cycle progress is retained as configured."]
+    start: { name: "<green>Start AFK", lore: ["<yellow>Click to start earning rewards."] }
+    stop: { name: "<red>Stop AFK", lore: ["<yellow>Click to stop and save progress."] }
+    rewards:
+      name: "<gold>Reward Plan"
+      lore: ["<gray>Current plan: <white>{plan}", "<gray>Item rewards are stored in your inbox."]
+inbox:
+  title: "<gold>AFK Reward Inbox"
+  loading: "<gray>Loading your reward inbox…"
+  load-failed: "<red>Could not load your inbox. Please try again."
+  generate-failed: "<red>Could not create {provider}:{item}. Contact an administrator."
+  inventory-full: "<yellow>Your inventory is full. The reward remains in your inbox."
+  update-failed: "<red>Could not save the claim state. Contact an administrator."
+  claimed: "<green>Claimed {amount} item(s)."
+  status:
+    name: "<gold>Inbox Status"
+    lore: ["<gray>Showing: <white>{count} entries", "<yellow>Click a reward to claim it."]
+  item:
+    lore: ["<gray>Amount: <white>{amount}", "<gray>Provider: <white>{provider}", "<gray>Pool: <white>{pool}", "", "<yellow>Click to claim"]
+admin:
+  input:
+    prompt: "<gold>[IdlePool]</gold> {prompt}; type <red>cancel</red> to cancel."
+    retry: "Please try again"
+    invalid: "<red>Invalid input: </red>{error}"
+  save-failed: "<red>Save failed: </red>{error}"
+  error:
+    invalid-text: "Invalid text length"
+    invalid-duration: "Invalid duration; use a value such as 30m, 2h or 7d"
+    negative-number: "The number cannot be negative"
+    pool-id: "The ID is invalid or already exists"
+    pool-exists: "That AFK pool ID already exists"
+    plan-exists: "That reward plan ID already exists"
+    plan-missing: "Reward plan does not exist: {plan}"
+    reward-index: "That reward index is no longer valid"
+    invalid-id: "IDs may contain lowercase letters, numbers, _ and - (maximum 32 characters)"
+    invalid-command: "The command cannot be empty or longer than 512 characters"
+    invalid-amount: "The amount must be between 1 and 1,000,000"
+    invalid-money: "The value must be greater than 0 and no more than 1 billion"
+    invalid-chance: "Chance must be between 0 and 100"
+    reward-missing: "That reward no longer exists"
+    milestone-zero: "A session milestone must be greater than 0"
+    provider-format: "Use the format provider:item_id"
+    unsupported-provider: "Unsupported item provider: {provider}"
+  pool:
+    saving: "<gray>Saving AFK pool configuration…"
+    prompt:
+      create: "Enter a new pool ID using lowercase letters, numbers, _ or -"
+      cycle: "Enter the reward cycle, for example 10m"
+      permission: "Enter the permission node"
+      plan: "Enter the reward plan ID"
+      maximum: "Enter the maximum player count; 0 means unlimited"
+      retention: "Enter progress retention, for example 7d"
+    list:
+      title: "<gold>AFK Pool Management"
+      entry-lore: ["<gray>ID: <white>{id}", "<gray>Status: <white>{status}", "<gray>Cycle: <white>{cycle}", "", "<yellow>Click to edit"]
+      reload: { name: "<green>Reload Configuration", lore: ["<gray>Reload all configuration files."] }
+      create: { name: "<green>Create AFK Pool", lore: ["<gray>Create a pool at your current position."] }
+      rewards: { name: "<green>Reward Plan Management", lore: ["<gray>Edit item, money and command rewards."] }
+    detail:
+      title: "<gold>Edit: {id}"
+      enabled: { name: "<green>Enabled", lore: ["<yellow>Click to toggle."] }
+      disabled: { name: "<red>Disabled", lore: ["<yellow>Click to toggle."] }
+      point-one: { name: "<red>Set Region Point 1", lore: ["<gray>Use the block at your current position."] }
+      point-two: { name: "<aqua>Set Region Point 2", lore: ["<gray>Use the block at your current position."] }
+      cycle: { name: "<yellow>Reward Cycle", lore: ["<gray>Current: <white>{value}", "<yellow>Click and type a value such as 10m."] }
+      permission: { name: "<yellow>Permission", lore: ["<gray>Current: <white>{value}", "<yellow>Click to edit."] }
+      plan: { name: "<yellow>Reward Plan", lore: ["<gray>Current: <white>{value}", "<yellow>Click to edit."] }
+      maximum: { name: "<yellow>Maximum AFK Players", lore: ["<gray>Current: <white>{value}", "<yellow>0 means unlimited."] }
+      retention: { name: "<yellow>Progress Retention", lore: ["<gray>Current: <white>{value}", "<yellow>Click and type a value such as 7d."] }
+      back: { name: "<yellow>Back", lore: [] }
+  reward:
+    saving: "<gray>Saving reward configuration…"
+    no-held-item: "<red>Hold the item you want to add in your main hand."
+    identified: "<gray>Detected item provider: <white>{provider}"
+    label: { cycle: "Cycle roll", milestone: "Session milestone", immediate: "Immediately" }
+    prompt:
+      create-plan: "Enter a new reward plan ID"
+      add-command: "Enter a console command without the leading slash"
+      add-money: "Enter the Vault currency amount"
+      add-item-id: "Enter provider:item_id, for example mythicmobs:SKELETON_SWORD"
+      item-amount: "Enter an item amount greater than 0"
+      money-amount: "Enter a currency amount greater than 0"
+      edit-command: "Enter the new console command"
+      chance: "Enter a chance from 0 to 100"
+      unlock-cycle: "Enter an unlock time such as 30m; use 0 for immediate"
+      unlock-milestone: "Enter a session milestone such as 30m or 2h"
+    list:
+      title: "<gold>Reward Plan Management"
+      entry: { name: "<yellow>{id}", lore: ["<gray>Rewards: <white>{count}", "<gray>Selection: <white>independent chance", "", "<yellow>Click to edit"] }
+      create: { name: "<green>Create Reward Plan", lore: ["<gray>Create an empty independent-chance plan."] }
+      back: { name: "<yellow>Back to AFK Pools", lore: [] }
+    plan:
+      title: "<gold>Reward Plan: {id}"
+      add-held: { name: "<green>Add Held Item", lore: ["<gray>Detects vanilla, IA, MMOItems and Slimefun.", "<gray>Stores a full snapshot when needed."] }
+      add-command: { name: "<green>Add Command Reward", lore: ["<gray>Enter a console command in chat."] }
+      add-money: { name: "<green>Add Vault Currency", lore: ["<gray>Enter the currency amount in chat."] }
+      add-id: { name: "<green>Add by Item ID", lore: ["<gray>For items that require a template ID.", "<gray>Format: provider:item_id"] }
+      back: { name: "<yellow>Back to Plan List", lore: [] }
+    detail:
+      title: "<gold>Edit Reward #{index}"
+      amount: { name: "<yellow>Amount: {value}", lore: ["<gray>Click to edit."] }
+      money: { name: "<yellow>Value: {value}", lore: ["<gray>Click to edit."] }
+      command: { name: "<yellow>Edit Command", lore: ["<gray>Current: <white>{value}", "<gray>Click to edit."] }
+      chance: { name: "<yellow>Chance: {value}%", lore: ["<gray>Click to enter 0–100."] }
+      trigger-cycle: { name: "<yellow>Trigger: {value}", lore: ["<gray>Rolls each cycle after unlocking.", "<yellow>Click to use a session milestone."] }
+      trigger-milestone: { name: "<yellow>Trigger: {value}", lore: ["<gray>Settles once when the session reaches the time.", "<yellow>Click to use cycle rolls."] }
+      unlock-cycle: { name: "<yellow>Unlock Time: {value}", lore: ["<gray>Excluded from cycle rolls before this time.", "<yellow>Enter 30m, 2h or 0."] }
+      unlock-milestone: { name: "<yellow>Milestone Time: {value}", lore: ["<gray>Settles when this session crosses the time.", "<yellow>Enter a value such as 30m or 2h."] }
+      delete: { name: "<red>Delete Reward", lore: ["<gray>Requires confirmation."] }
+      back: { name: "<yellow>Back to Reward Plan", lore: [] }
+    delete:
+      title: "<red>Delete this reward?"
+      confirm: { name: "<green>Confirm Delete", lore: ["<red>This cannot be undone."] }
+      cancel: { name: "<yellow>Cancel", lore: [] }
+    icon:
+      item-name: "<yellow>{provider}:{id}"
+      money-name: "<gold>Vault Currency ×{amount}"
+      command-name: "<aqua>Command Reward"
+      lore: ["<gray>Index: <white>{index}", "<gray>Chance: <white>{chance}%", "<gray>Trigger: <white>{trigger}", "<gray>Time: <white>{time}"]
+      item-amount: "<gray>Amount: <white>{amount}"
+      command: "<gray>Command: <white>{command}"
+      footer: ["", "<yellow>Click to edit"]

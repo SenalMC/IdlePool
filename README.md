@@ -2,7 +2,7 @@
 
 适用于 Paper 1.21.1～26.2 的区域挂机奖励插件。玩家进入挂机池区域后会看到原生箱子 GUI，点击按钮才开始累计挂机时间和奖励。
 
-> 当前为 `1.0.0-rc.4` 上线候选版本。Paper 26.2 仍需跟随服务端实验构建持续验证。
+> 当前正式版本为 `1.0.0`。Paper 26.2 仍需跟随服务端实验构建持续验证。
 
 ## 已实现
 
@@ -25,6 +25,8 @@
 - 管理员手持物品自动识别来源，未知自定义物品保存为完整快照
 - ItemsAdder 可选提供按钮、挂机币与 ActionBar 图标，菜单背景始终使用原版箱子
 - `/afkpool info` 显示版本、服务端、ItemsAdder 状态并异步检查 GitHub 更新
+- 所有玩家消息和 GUI 文本均可在 `message.yml` 配置，并附带完整 `en.yml`
+- 正常结束挂机后自动打开暂存箱，可用 `inbox.open-on-stop` 关闭
 
 ## 构建
 
@@ -40,7 +42,7 @@ Windows：
 .\gradlew.bat clean test shadowJar
 ```
 
-插件产物位于 `build/libs/IdlePool-1.0.0-rc.4.jar`。
+插件产物位于 `build/libs/IdlePool-1.0.0.jar`。
 
 正式发布包：
 
@@ -48,7 +50,7 @@ Windows：
 .\gradlew.bat clean test releaseBundle
 ```
 
-输出位于 `build/distributions/IdlePool-1.0.0-rc.4-release.zip`。
+输出位于 `build/distributions/IdlePool-1.0.0-release.zip`。
 
 ## 开始使用
 
@@ -59,6 +61,8 @@ Windows：
 5. 执行 `/afkpool admin`，点击“创建挂机池”并输入 ID。
 6. 设置区域两点、奖励周期、进度保留时间和奖励方案。
 7. 启用挂机池。
+
+默认使用 `message.yml` 简体中文语言文件。若要切换英文，将 `config.yml` 中的 `language.file` 改为 `en.yml` 后执行 `/afkpool reload`。
 
 默认示例挂机池处于停用状态，避免首次启动后意外覆盖主城区域。
 

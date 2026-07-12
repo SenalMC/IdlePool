@@ -1,6 +1,7 @@
+# Paper 插件元数据；Paper plugin metadata.
 name: IdlePool
 version: '${version}'
-main: cn.guajichi.idlepool.IdlePoolPlugin
+main: top.cnuo.idlepool.IdlePoolPlugin
 description: Region-based AFK rewards with native chest GUIs and optional ItemsAdder icons.
 api-version: '1.21'
 author: Chirnuo

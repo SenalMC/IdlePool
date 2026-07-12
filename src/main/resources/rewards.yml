@@ -1,7 +1,11 @@
+# 奖励方案示例；每项奖励独立判定概率。
+# Reward plan example; every reward rolls its chance independently.
 reward-plans:
   basic:
     selection-mode: independent
     rewards:
+      # 周期奖励：连续挂机满 30 分钟后，才会在每个周期中以 10% 概率获得。
+      # Cycle reward: unlocks after 30 minutes, then has a 10% chance each cycle.
       - type: item
         provider: vanilla
         id: DIAMOND
@@ -9,6 +13,8 @@ reward-plans:
         chance: 10.0
         trigger: cycle
         unlock-after: 30m
+      # 立即解锁的普通周期奖励。
+      # Regular cycle reward available immediately.
       - type: item
         provider: vanilla
         id: GOLD_NUGGET
@@ -16,6 +22,8 @@ reward-plans:
         chance: 100.0
         trigger: cycle
         unlock-after: 0s
+      # 单次挂机里程碑：本次连续挂机到达 1 小时时额外结算一次。
+      # Session milestone: settles once when the current continuous session reaches one hour.
       - type: command
         command: "say {player} 连续挂机已满一小时"
         chance: 100.0

@@ -1,38 +1,42 @@
+# 数据库与定时保存设置。
+# Database and periodic checkpoint settings.
 storage:
   file: data.db
   checkpoint-interval-seconds: 30
 
+# 启动时从 GitHub 检查新版本；关闭后 /afkpool info 会显示已禁用。
+# Check GitHub for updates on startup; /afkpool info reports when this is disabled.
 update-check:
   enabled: true
   version-url: "https://raw.githubusercontent.com/SenalMC/IdlePool/main/version.txt"
   timeout-seconds: 5
 
+# 选择消息文件。默认中文；改为 en.yml 可使用英文。
+# Select the message file. Chinese is the default; use en.yml for English.
+language:
+  file: message.yml
+
+# 新挂机池未单独指定时使用的进度保留期。
+# Default partial-progress retention for pools without an explicit value.
 progress:
   default-retention: 7d
 
+# ActionBar 文本位于所选语言文件的 actionbar.format。
+# ActionBar text is configured as actionbar.format in the selected language file.
 actionbar:
   enabled: true
-  format: ":clock: <yellow>挂机 <white>{session_time}  :gift: <yellow>下次奖励 <white>{next_reward}  :coin: <green>本次 {earned}"
 
+# ItemsAdder 字体图片 ID；ItemsAdder 不可用时会自动退回纯文本。
+# ItemsAdder font-image IDs; plain text is used when ItemsAdder is unavailable.
 itemsadder:
   font-images:
     clock: "idlepool:clock"
     gift: "idlepool:gift"
     coin: "idlepool:coin"
 
+# 暂存箱永久保留；玩家正常结束或离开挂机池时默认自动打开一次。
+# Inbox entries are permanent; the inbox opens once after a normal stop or region exit by default.
 inbox:
   retention: permanent
   max-entries-per-player: 500
-
-messages:
-  prefix: "<gold>[挂机池]</gold> "
-  no-pool: "<red>你当前不在挂机池区域内。"
-  no-permission: "<red>你没有使用这个挂机池的权限。"
-  already-active: "<yellow>你已经在挂机了。"
-  pool-full: "<red>这个挂机池已达到人数上限。"
-  started: "<green>已开始在 <white>{pool}</white> 挂机。"
-  stopped: "<yellow>挂机已结束，本次挂机 {session_time}。"
-  left-region: "<yellow>你离开了挂机池，进度已保存。"
-  progress-loading: "<gray>正在读取你的挂机进度……"
-  milestone-reached: "<green>连续挂机达到 <white>{time}</white>，里程碑奖励已结算，本次获得 <white>{earned}</white> 项。"
-  itemsadder-not-ready: "<yellow>ItemsAdder 资源尚未加载，已使用原版按钮和 ActionBar 文本。"
+  open-on-stop: true
