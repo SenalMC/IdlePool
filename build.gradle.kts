@@ -146,11 +146,5 @@ tasks {
         from("docs/release-checklist.md") {
             into("docs")
         }
-        from("docs/minebbs-resource-draft.md") {
-            into("docs")
-        }
-        from("docs/minebbs-publish-checklist.md") {
-            into("docs")
-        }
     }
 }
