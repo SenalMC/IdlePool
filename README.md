@@ -2,7 +2,7 @@
 
 适用于 Paper 1.21.1～26.2 的区域挂机奖励插件。玩家进入挂机池区域后会看到原生箱子 GUI，点击按钮才开始累计挂机时间和奖励。
 
-> 当前正式版本为 `1.0.0`。Paper 26.2 仍需跟随服务端实验构建持续验证。
+> 当前开发版本为 `1.1.0`，插件主体已使用 Kotlin 重写。Paper 26.2 仍需跟随服务端实验构建持续验证。
 
 ## 已实现
 
@@ -27,6 +27,11 @@
 - `/afkpool info` 显示版本、服务端、ItemsAdder 状态并异步检查 GitHub 更新
 - 所有玩家消息和 GUI 文本均可在 `message.yml` 配置，并附带完整 `en.yml`
 - 正常结束挂机后自动打开暂存箱，可用 `inbox.open-on-stop` 关闭
+- 暂存箱事务预约、分页、一键领取和异常复核，避免重复领取
+- 奖励唯一结算 ID 与 SQLite 流水，防止周期奖励重复执行
+- 管理 GUI 可视化选择、复制和删除挂机池/奖励方案
+- 配置 schema 自动迁移并生成 `.bak` 备份，语言缺失键自动回退
+- 可选 PlaceholderAPI 扩展
 
 ## 构建
 
@@ -42,7 +47,7 @@ Windows：
 .\gradlew.bat clean test shadowJar
 ```
 
-插件产物位于 `build/libs/IdlePool-1.0.0.jar`。
+插件产物位于 `build/libs/IdlePool-1.1.0.jar`。
 
 正式发布包：
 
@@ -50,7 +55,7 @@ Windows：
 .\gradlew.bat clean test releaseBundle
 ```
 
-输出位于 `build/distributions/IdlePool-1.0.0-release.zip`。
+输出位于 `build/distributions/IdlePool-1.1.0-release.zip`。
 
 ## 开始使用
 
@@ -64,6 +69,8 @@ Windows：
 
 默认使用 `message.yml` 简体中文语言文件。若要切换英文，将 `config.yml` 中的 `language.file` 改为 `en.yml` 后执行 `/afkpool reload`。
 
+从 v1.0 升级时会自动迁移 `config.yml`、`pools.yml`、`rewards.yml` 和 SQLite 表结构。原 YAML 会在首次迁移前保存为 `*.v1.bak`。
+
 默认示例挂机池处于停用状态，避免首次启动后意外覆盖主城区域。
 
 ## 命令
@@ -76,6 +83,18 @@ Windows：
 - `/afkpool admin rewards`：直接打开奖励方案管理 GUI
 - `/afkpool reload`：重载配置
 - `/afkpool doctor`：执行上线配置与集成检查
+
+## PlaceholderAPI
+
+安装 PlaceholderAPI 后会自动注册：
+
+- `%idlepool_active%`
+- `%idlepool_pool%`
+- `%idlepool_session_time%`
+- `%idlepool_total_time%`
+- `%idlepool_next_reward%`
+- `%idlepool_earned%`
+- `%idlepool_inbox_count%`
 
 ## 奖励物品 ID
 

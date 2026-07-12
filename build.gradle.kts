@@ -1,20 +1,23 @@
 plugins {
     java
+    kotlin("jvm") version "2.4.0"
     id("com.gradleup.shadow") version "8.3.6"
 }
 
 group = "top.cnuo"
-version = "1.0.0"
+version = "1.1.0"
 
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://maven.devs.beer/")
+    maven("https://repo.extendedclip.com/releases/")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
     compileOnly("dev.lone:api-itemsadder:4.0.10")
+    compileOnly("me.clip:placeholderapi:2.12.3")
 
     implementation("org.xerial:sqlite-jdbc:3.46.1.3")
 
@@ -29,7 +32,20 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+kotlin {
+    jvmToolchain(21)
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        javaParameters.set(true)
+    }
+}
+
 tasks {
+    jar {
+        // Keep the unshaded artifact separate; the distributable JAR is produced by shadowJar.
+        archiveClassifier.set("plain")
+    }
+
     compileJava {
         options.encoding = "UTF-8"
         options.release.set(21)

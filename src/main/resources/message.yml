@@ -107,6 +107,19 @@ inbox:
   inventory-full: "<yellow>背包空间不足，物品仍保留在暂存箱。"
   update-failed: "<red>奖励领取状态保存失败，请联系管理员核对。"
   claimed: "<green>已领取 {amount} 个物品。"
+  claim-conflict: "<yellow>该奖励正在被处理，请刷新暂存箱后重试。"
+  claim-all-start: "<gray>正在安全领取暂存箱中的奖励……"
+  claim-all-finished: "<green>一键领取完成，共放入背包 {amount} 个物品。"
+  review-required: "<red>奖励已进入安全复核状态，不会重复发放；请联系管理员检查日志。"
+  previous:
+    name: "<yellow>上一页"
+    lore: ["<gray>返回第 {page} 页。"]
+  next:
+    name: "<yellow>下一页"
+    lore: ["<gray>前往第 {page} 页。"]
+  claim-all:
+    name: "<green>一键领取"
+    lore: ["<gray>安全领取全部 {count} 项暂存奖励。", "<yellow>背包满时自动停止。"]
   status:
     name: "<gold>暂存箱状态"
     lore:
@@ -134,6 +147,7 @@ admin:
     negative-number: "数字不能小于 0"
     pool-id: "ID 格式不正确或已经存在"
     pool-exists: "挂机池 ID 已存在"
+    pool-missing: "挂机池已经不存在"
     plan-exists: "奖励方案 ID 已存在"
     plan-missing: "奖励方案不存在：{plan}"
     reward-index: "奖励索引已经失效"
@@ -155,6 +169,7 @@ admin:
       plan: "请输入奖励方案 ID"
       maximum: "请输入最大人数，0 表示不限"
       retention: "请输入进度保留时间，例如 7d"
+      copy: "请输入复制后的新挂机池 ID"
     list:
       title: "<gold>挂机池管理"
       entry-lore:
@@ -183,7 +198,16 @@ admin:
       plan: { name: "<yellow>奖励方案", lore: ["<gray>当前：<white>{value}", "<yellow>点击修改"] }
       maximum: { name: "<yellow>最大挂机人数", lore: ["<gray>当前：<white>{value}", "<yellow>点击修改，0 表示不限"] }
       retention: { name: "<yellow>进度保留时间", lore: ["<gray>当前：<white>{value}", "<yellow>点击后输入，例如 7d"] }
+      copy: { name: "<green>复制挂机池", lore: ["<gray>复制区域与全部设置，新副本默认停用。"] }
+      delete: { name: "<red>删除挂机池", lore: ["<gray>点击后需要再次确认。"] }
       back: { name: "<yellow>返回", lore: [] }
+    plan-picker:
+      title: "<gold>选择奖励方案"
+      entry: { name: "<yellow>{id}", lore: ["<gray>奖励数量：<white>{count}", "<green>点击选择"] }
+    delete:
+      title: "<red>确认删除挂机池 {id}？"
+      confirm: { name: "<green>确认删除", lore: ["<red>此操作不可撤销。"] }
+      cancel: { name: "<yellow>取消", lore: [] }
   reward:
     saving: "<gray>正在保存奖励配置……"
     no-held-item: "<red>请先在主手拿着要添加的物品。"
@@ -203,6 +227,7 @@ admin:
       chance: "请输入触发概率 0～100"
       unlock-cycle: "请输入概率解锁时间，例如 30m；输入 0 表示立即参与"
       unlock-milestone: "请输入单次挂机里程碑时间，例如 30m 或 2h"
+      copy-plan: "请输入复制后的新奖励方案 ID"
     list:
       title: "<gold>奖励方案管理"
       entry:
@@ -217,6 +242,12 @@ admin:
       add-money: { name: "<green>添加 Vault 货币", lore: ["<gray>点击后输入货币数量。"] }
       add-id: { name: "<green>通过物品 ID 添加", lore: ["<gray>适合需要指定模板 ID 的物品。", "<gray>格式：provider:item_id"] }
       back: { name: "<yellow>返回方案列表", lore: [] }
+      copy: { name: "<green>复制奖励方案", lore: ["<gray>复制全部奖励和时间参数。"] }
+      delete: { name: "<red>删除奖励方案", lore: ["<gray>点击后需要再次确认。"] }
+    plan-delete:
+      title: "<red>确认删除奖励方案 {id}？"
+      confirm: { name: "<green>确认删除", lore: ["<red>引用此方案的挂机池将无法发奖。"] }
+      cancel: { name: "<yellow>取消", lore: [] }
     detail:
       title: "<gold>编辑奖励 #{index}"
       amount: { name: "<yellow>数量：{value}", lore: ["<gray>点击修改。"] }

@@ -2,7 +2,7 @@
 
 ## 文件安装
 
-- [ ] 将 `plugins/IdlePool-1.0.0.jar` 放入服务端 `plugins`。
+- [ ] 将 `plugins/IdlePool-1.1.0.jar` 放入服务端 `plugins`。
 - [ ] 如需 IA 图标，将 `ItemsAdder/contents/idlepool` 放入 `plugins/ItemsAdder/contents`。
 - [ ] 从 rc.1 升级且继续使用 IA 时，删除 `contents/idlepool/textures/font/gui` 旧背景目录，或使用 `install.ps1`。
 - [ ] 如需 IA 图标或 IA 奖励物品，安装与服务端版本兼容的 ItemsAdder 4.x。
@@ -34,6 +34,10 @@
 - [ ] 实物奖励进入暂存箱，背包满时不会丢失。
 - [ ] 货币和命令奖励能够即时发放。
 - [ ] `/afkpool claim` 能正确领取原版和外部物品。
+- [ ] 暂存箱分页、上一页、下一页与一键领取均可用。
+- [ ] 模拟数据库领取提交失败时奖励进入 REVIEW，不会再次显示为可领取。
+- [ ] v1.0 配置升级后生成 `.v1.bak`，语言缺失键能使用内置值回退。
+- [ ] 安装 PlaceholderAPI 后验证 `%idlepool_session_time%` 与 `%idlepool_inbox_count%`。
 - [ ] 重启服务器后进度和暂存奖励仍然存在。
 
 ## 上线前备份

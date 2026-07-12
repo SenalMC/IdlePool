@@ -1,3 +1,6 @@
+# 配置结构版本；Configuration schema version.
+schema-version: 2
+
 # 奖励方案示例；每项奖励独立判定概率。
 # Reward plan example; every reward rolls its chance independently.
 reward-plans:

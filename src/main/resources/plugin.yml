@@ -2,7 +2,7 @@
 name: IdlePool
 version: '${version}'
 main: top.cnuo.idlepool.IdlePoolPlugin
-description: Region-based AFK rewards with native chest GUIs and optional ItemsAdder icons.
+description: Kotlin-based region AFK rewards with transactional inboxes and optional integrations.
 api-version: '1.21'
 author: Chirnuo
 email: mc@mc.email.cn
@@ -14,6 +14,7 @@ softdepend:
   - MythicMobs
   - MMOItems
   - Slimefun
+  - PlaceholderAPI
 commands:
   afkpool:
     description: Open or manage IdlePool.

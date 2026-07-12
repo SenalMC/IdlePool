@@ -88,6 +88,19 @@ inbox:
   inventory-full: "<yellow>Your inventory is full. The reward remains in your inbox."
   update-failed: "<red>Could not save the claim state. Contact an administrator."
   claimed: "<green>Claimed {amount} item(s)."
+  claim-conflict: "<yellow>This reward is already being processed. Refresh the inbox and try again."
+  claim-all-start: "<gray>Safely claiming inbox rewards…"
+  claim-all-finished: "<green>Claim-all finished; {amount} item(s) were inserted."
+  review-required: "<red>The reward entered safe review and will not be duplicated. Contact an administrator."
+  previous:
+    name: "<yellow>Previous Page"
+    lore: ["<gray>Return to page {page}."]
+  next:
+    name: "<yellow>Next Page"
+    lore: ["<gray>Open page {page}."]
+  claim-all:
+    name: "<green>Claim All"
+    lore: ["<gray>Safely claim all {count} stored rewards.", "<yellow>Stops when the inventory is full."]
   status:
     name: "<gold>Inbox Status"
     lore: ["<gray>Showing: <white>{count} entries", "<yellow>Click a reward to claim it."]
@@ -105,6 +118,7 @@ admin:
     negative-number: "The number cannot be negative"
     pool-id: "The ID is invalid or already exists"
     pool-exists: "That AFK pool ID already exists"
+    pool-missing: "That AFK pool no longer exists"
     plan-exists: "That reward plan ID already exists"
     plan-missing: "Reward plan does not exist: {plan}"
     reward-index: "That reward index is no longer valid"
@@ -126,6 +140,7 @@ admin:
       plan: "Enter the reward plan ID"
       maximum: "Enter the maximum player count; 0 means unlimited"
       retention: "Enter progress retention, for example 7d"
+      copy: "Enter the ID for the copied AFK pool"
     list:
       title: "<gold>AFK Pool Management"
       entry-lore: ["<gray>ID: <white>{id}", "<gray>Status: <white>{status}", "<gray>Cycle: <white>{cycle}", "", "<yellow>Click to edit"]
@@ -143,7 +158,16 @@ admin:
       plan: { name: "<yellow>Reward Plan", lore: ["<gray>Current: <white>{value}", "<yellow>Click to edit."] }
       maximum: { name: "<yellow>Maximum AFK Players", lore: ["<gray>Current: <white>{value}", "<yellow>0 means unlimited."] }
       retention: { name: "<yellow>Progress Retention", lore: ["<gray>Current: <white>{value}", "<yellow>Click and type a value such as 7d."] }
+      copy: { name: "<green>Copy AFK Pool", lore: ["<gray>Copies the region and settings; the copy starts disabled."] }
+      delete: { name: "<red>Delete AFK Pool", lore: ["<gray>Requires confirmation."] }
       back: { name: "<yellow>Back", lore: [] }
+    plan-picker:
+      title: "<gold>Select Reward Plan"
+      entry: { name: "<yellow>{id}", lore: ["<gray>Rewards: <white>{count}", "<green>Click to select"] }
+    delete:
+      title: "<red>Delete AFK pool {id}?"
+      confirm: { name: "<green>Confirm Delete", lore: ["<red>This cannot be undone."] }
+      cancel: { name: "<yellow>Cancel", lore: [] }
   reward:
     saving: "<gray>Saving reward configuration…"
     no-held-item: "<red>Hold the item you want to add in your main hand."
@@ -160,6 +184,7 @@ admin:
       chance: "Enter a chance from 0 to 100"
       unlock-cycle: "Enter an unlock time such as 30m; use 0 for immediate"
       unlock-milestone: "Enter a session milestone such as 30m or 2h"
+      copy-plan: "Enter the ID for the copied reward plan"
     list:
       title: "<gold>Reward Plan Management"
       entry: { name: "<yellow>{id}", lore: ["<gray>Rewards: <white>{count}", "<gray>Selection: <white>independent chance", "", "<yellow>Click to edit"] }
@@ -172,6 +197,12 @@ admin:
       add-money: { name: "<green>Add Vault Currency", lore: ["<gray>Enter the currency amount in chat."] }
       add-id: { name: "<green>Add by Item ID", lore: ["<gray>For items that require a template ID.", "<gray>Format: provider:item_id"] }
       back: { name: "<yellow>Back to Plan List", lore: [] }
+      copy: { name: "<green>Copy Reward Plan", lore: ["<gray>Copies all rewards and timing settings."] }
+      delete: { name: "<red>Delete Reward Plan", lore: ["<gray>Requires confirmation."] }
+    plan-delete:
+      title: "<red>Delete reward plan {id}?"
+      confirm: { name: "<green>Confirm Delete", lore: ["<red>Pools referencing it will no longer grant rewards."] }
+      cancel: { name: "<yellow>Cancel", lore: [] }
     detail:
       title: "<gold>Edit Reward #{index}"
       amount: { name: "<yellow>Amount: {value}", lore: ["<gray>Click to edit."] }

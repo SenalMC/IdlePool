@@ -1,8 +1,13 @@
+# 配置结构版本由插件自动维护，请勿手动降低。
+# Configuration schema version is maintained automatically; do not downgrade it.
+config-version: 2
+
 # 数据库与定时保存设置。
 # Database and periodic checkpoint settings.
 storage:
   file: data.db
   checkpoint-interval-seconds: 30
+  reward-log-retention-days: 30
 
 # 启动时从 GitHub 检查新版本；关闭后 /afkpool info 会显示已禁用。
 # Check GitHub for updates on startup; /afkpool info reports when this is disabled.
@@ -40,3 +45,4 @@ inbox:
   retention: permanent
   max-entries-per-player: 500
   open-on-stop: true
+  page-size: 45
