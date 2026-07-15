@@ -143,7 +143,7 @@ ItemsAdder 图标和按钮命名约定见 [ItemsAdder 资源说明](docs/itemsad
 
 项目主页：https://github.com/SenalMC/IdlePool/
 
-完整 Wiki 位于 [`wiki/`](wiki/README.md)，根目录 `.gitbook.yaml` 可直接用于 GitBook Git Sync。仓库所有者的一次性绑定步骤见 [GitBook 发布说明](docs/gitbook-publishing.md)。
+完整 Wiki 位于 [`wiki/`](wiki/README.md)
 
 ## 开源许可
 
