@@ -35,10 +35,15 @@ class UpdateChecker(private val plugin: JavaPlugin) {
         val remote = response.body().lineSequence().firstOrNull()?.trim().orEmpty()
         if (remote.length > 64 || !remote.matches(Regex("v?[0-9]+(?:\\.[0-9]+)*(?:-[0-9A-Za-z.-]+)?"))) { fail(Messages.raw("update.invalid-version")); return }
         try {
-            if (VersionComparator.compare(remote, currentVersion()) > 0) {
+            val comparison = VersionComparator.compare(remote, currentVersion())
+            if (comparison > 0) {
                 current.set(Result(State.UPDATE_AVAILABLE, remote, Messages.raw("update.available")))
                 plugin.logger.warning("检测到 IdlePool 新版本 $remote，当前版本 ${currentVersion()}。下载：$RELEASES_URL")
-            } else { current.set(Result(State.UP_TO_DATE, remote, Messages.raw("update.up-to-date"))); plugin.logger.info("IdlePool 更新检查完成：当前已是最新版本（$remote）。") }
+            } else {
+                current.set(Result(State.UP_TO_DATE, if (comparison == 0) remote else currentVersion(), Messages.raw("update.up-to-date")))
+                if (comparison == 0) plugin.logger.info("IdlePool 更新检查完成：当前已是最新版本（$remote）。")
+                else plugin.logger.info("IdlePool 更新检查完成：本地版本 ${currentVersion()} 高于远程版本 $remote。")
+            }
         } catch (exception: IllegalArgumentException) { fail(Messages.raw("update.compare-failed", mapOf("error" to exception.message.orEmpty()))) }
     }
     private fun fail(message: String) { current.set(Result(State.ERROR, "", message)); plugin.logger.warning("IdlePool 更新检查失败：$message") }

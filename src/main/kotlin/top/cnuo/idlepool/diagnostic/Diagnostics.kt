@@ -43,6 +43,8 @@ class DoctorService(
         if (visuals.available()) result.ok("doctor.itemsadder-ready") else result.warning("doctor.itemsadder-unavailable")
         plans.all().forEach { plan ->
             if (plan.rewards.isEmpty()) result.warning("doctor.empty-plan", mapOf("plan" to plan.id))
+            if (plan.selectionMode != SelectionMode.INDEPENDENT && plan.rewards.filter { it.trigger == RewardTrigger.CYCLE }.none { it.weight > 0 }) result.error("doctor.no-positive-weight", mapOf("plan" to plan.id))
+            if (plan.pity.enabled && (plan.pity.rewardIndex !in plan.rewards.indices || plan.rewards[plan.pity.rewardIndex].trigger != RewardTrigger.CYCLE)) result.error("doctor.invalid-pity", mapOf("plan" to plan.id))
             plan.rewards.forEach { validate(result, plan, it) }
         }
         Messages.send(sender, "doctor.separator")

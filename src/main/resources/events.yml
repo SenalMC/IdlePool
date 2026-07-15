@@ -1,0 +1,19 @@
+# 配置结构版本；Configuration schema version.
+schema-version: 3
+
+# 活动时间按此时区解析；Event times are parsed in this time zone.
+time-zone: "Asia/Shanghai"
+
+events:
+  weekend-double:
+    # 示例默认停用；The example is disabled by default.
+    enabled: false
+    display-name: "周末双倍挂机"
+    # 支持 yyyy-MM-dd HH:mm:ss 或 ISO-8601；Supports local or ISO-8601 timestamps.
+    start: "2026-07-18 00:00:00"
+    end: "2026-07-19 23:59:59"
+    # * 表示全部挂机池；* targets every pool.
+    pools: ["*"]
+    progress-multiplier: 2.0
+    item-multiplier: 2.0
+    money-multiplier: 1.5

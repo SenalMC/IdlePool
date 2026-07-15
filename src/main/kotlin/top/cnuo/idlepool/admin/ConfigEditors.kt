@@ -54,13 +54,25 @@ class RewardConfigEditor(private val plugin: JavaPlugin) : AutoCloseable {
     private val snapshotsFile = File(plugin.dataFolder, "reward-snapshots.yml")
     private val executor = Executors.newSingleThreadExecutor { Thread(it, "IdlePool-RewardConfig").apply { isDaemon = true } }
 
-    fun createPlan(id: String) = edit { yaml -> require(!yaml.contains(root(id))) { Messages.raw("admin.error.plan-exists") }; yaml.set("${root(id)}.selection-mode", "independent"); yaml.set("${root(id)}.rewards", emptyList<Any>()) }
+    fun createPlan(id: String) = edit { yaml ->
+        require(!yaml.contains(root(id))) { Messages.raw("admin.error.plan-exists") }
+        yaml.set("${root(id)}.selection-mode", "independent"); yaml.set("${root(id)}.draw-count", 1)
+        yaml.set("${root(id)}.pity.enabled", false); yaml.set("${root(id)}.pity.after-cycles", 20)
+        yaml.set("${root(id)}.pity.reward-index", 1); yaml.set("${root(id)}.pity.reset-on-win", true)
+        yaml.set("${root(id)}.rewards", emptyList<Any>())
+    }
     fun copyPlan(source: String, target: String) = edit { yaml ->
         require(!yaml.contains(root(target))) { Messages.raw("admin.error.plan-exists") }
         val section = yaml.getConfigurationSection(root(source)) ?: throw IllegalArgumentException(Messages.raw("admin.error.plan-missing", mapOf("plan" to source)))
         yaml.set(root(target), sectionMap(section))
     }
     fun deletePlan(id: String) = edit { it.set(root(id), null) }
+    fun setPlan(id: String, key: String, value: Any?) = edit { yaml -> require(yaml.contains(root(id))) { Messages.raw("admin.error.plan-missing", mapOf("plan" to id)) }; yaml.set("${root(id)}.$key", value) }
+    fun setPity(id: String, enabled: Boolean, cycles: Int = 20, rewardIndex: Int = 1) = edit { yaml ->
+        require(yaml.contains(root(id))) { Messages.raw("admin.error.plan-missing", mapOf("plan" to id)) }
+        yaml.set("${root(id)}.pity.enabled", enabled); yaml.set("${root(id)}.pity.after-cycles", cycles)
+        yaml.set("${root(id)}.pity.reward-index", rewardIndex); yaml.set("${root(id)}.pity.reset-on-win", true)
+    }
     fun addItem(plan: String, provider: String, itemId: String, amount: Int) = append(plan, base("item").apply { put("provider", provider); put("id", itemId); put("amount", amount.coerceAtLeast(1)) })
     fun addCommand(plan: String, command: String) = append(plan, base("command").apply { put("command", command) })
     fun addMoney(plan: String, amount: Double) = append(plan, base("money").apply { put("amount", amount.coerceAtLeast(0.0)) })
@@ -84,7 +96,7 @@ class RewardConfigEditor(private val plugin: JavaPlugin) : AutoCloseable {
         require(yaml.contains(root(plan))) { Messages.raw("admin.error.plan-missing", mapOf("plan" to plan)) }
         return yaml.getMapList("${root(plan)}.rewards").map { raw -> raw.entries.associate { it.key.toString() to it.value }.toMutableMap() }.toMutableList()
     }
-    private fun base(type: String) = linkedMapOf<String, Any?>("type" to type, "chance" to 100.0, "trigger" to "cycle", "unlock-after" to "0s")
+    private fun base(type: String) = linkedMapOf<String, Any?>("type" to type, "chance" to 100.0, "weight" to 100.0, "trigger" to "cycle", "unlock-after" to "0s")
     private fun requireIndex(list: List<*>, index: Int) { require(index in list.indices) { Messages.raw("admin.error.reward-index") } }
     private fun root(id: String) = "reward-plans.$id"
     private fun sectionMap(section: ConfigurationSection): Map<String, Any?> = section.getKeys(false).associateWith { key ->

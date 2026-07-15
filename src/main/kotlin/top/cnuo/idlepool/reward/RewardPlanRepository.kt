@@ -17,7 +17,22 @@ class RewardPlanRepository(private val plugin: JavaPlugin) {
             ?: run { plans = emptyMap(); return }
         plans = root.getKeys(false).mapNotNull { id ->
             val section = root.getConfigurationSection(id) ?: return@mapNotNull null
-            try { id.lowercase(Locale.ROOT) to RewardPlan(id, section.getMapList("rewards").map(::parse)) }
+            try {
+                val pitySection = section.getConfigurationSection("pity")
+                val pity = PityConfig(
+                    pitySection?.getBoolean("enabled", false) ?: false,
+                    pitySection?.getInt("after-cycles", 0) ?: 0,
+                    (pitySection?.getInt("reward-index", 0) ?: 0) - 1,
+                    pitySection?.getBoolean("reset-on-win", true) ?: true,
+                )
+                id.lowercase(Locale.ROOT) to RewardPlan(
+                    id,
+                    section.getMapList("rewards").map(::parse),
+                    SelectionMode.parse(section.getString("selection-mode", "independent")),
+                    section.getInt("draw-count", 1).coerceIn(1, 45),
+                    pity,
+                )
+            }
             catch (exception: RuntimeException) { plugin.logger.log(Level.SEVERE, "无法加载奖励方案 $id", exception); null }
         }.toMap()
         plugin.logger.info("已加载 ${plans.size} 个奖励方案。")
@@ -32,10 +47,11 @@ class RewardPlanRepository(private val plugin: JavaPlugin) {
         require(chance.isFinite() && chance in 0.0..100.0) { "Reward chance must be between 0 and 100" }
         val trigger = RewardTrigger.parse(string(raw, "trigger", "cycle"))
         val unlock = duration(raw["unlock-after"])
+        val weight = number(raw, "weight", chance).toDouble()
         return when (type) {
-            RewardType.ITEM -> RewardDefinition(type, string(raw, "provider", "vanilla").lowercase(), string(raw, "id", "STONE"), number(raw, "amount", 1).toInt().coerceAtLeast(1), 0.0, "", chance, trigger, unlock)
-            RewardType.MONEY -> RewardDefinition(type, "vault", "", 0, number(raw, "amount", 0).toDouble().coerceAtLeast(0.0), "", chance, trigger, unlock)
-            RewardType.COMMAND -> RewardDefinition(type, "command", "", 0, 0.0, string(raw, "command", ""), chance, trigger, unlock)
+            RewardType.ITEM -> RewardDefinition(type, string(raw, "provider", "vanilla").lowercase(), string(raw, "id", "STONE"), number(raw, "amount", 1).toInt().coerceAtLeast(1), 0.0, "", chance, weight, trigger, unlock)
+            RewardType.MONEY -> RewardDefinition(type, "vault", "", 0, number(raw, "amount", 0).toDouble().coerceAtLeast(0.0), "", chance, weight, trigger, unlock)
+            RewardType.COMMAND -> RewardDefinition(type, "command", "", 0, 0.0, string(raw, "command", ""), chance, weight, trigger, unlock)
         }
     }
 

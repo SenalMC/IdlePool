@@ -2,7 +2,7 @@
 name: IdlePool
 version: '${version}'
 main: top.cnuo.idlepool.IdlePoolPlugin
-description: Kotlin-based region AFK rewards with transactional inboxes and optional integrations.
+description: Kotlin region AFK rewards with leaderboards, weighted pity, multiplier events and transactional operations.
 api-version: '1.21'
 author: Chirnuo
 email: mc@mc.email.cn
@@ -18,7 +18,7 @@ softdepend:
 commands:
   afkpool:
     description: Open or manage IdlePool.
-    usage: /afkpool [info|claim|stop|admin|doctor|reload]
+    usage: /afkpool [info|claim|history|stats|top|stop|event|admin|doctor|reload]
     aliases: [idlepool]
 permissions:
   idlepool.use:

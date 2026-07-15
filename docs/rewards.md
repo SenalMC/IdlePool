@@ -18,6 +18,28 @@
 
 将 `unlock-after` 设为 `0s` 表示立即参与周期抽取。旧配置没有这两个字段时，自动按 `trigger: cycle` 和 `unlock-after: 0s` 处理。
 
+## 抽取模式与保底
+
+v1.2 支持三种周期抽取模式：
+
+- `independent`：逐项按 `chance` 独立判定，可以同时获得多项奖励。
+- `weighted-one`：按 `weight` 从已解锁奖励中抽取一项。
+- `weighted-multiple`：按 `weight` 不重复抽取 `draw-count` 项。
+
+权重模式下，`weight` 只表示奖励之间的相对权重，不是百分比。下面的方案每周期不重复抽取两项，并在连续 20 个周期未获得第 3 项奖励后触发保底：
+
+```yaml
+selection-mode: weighted-multiple
+draw-count: 2
+pity:
+  enabled: true
+  after-cycles: 20
+  reward-index: 3
+  reset-on-win: true
+```
+
+保底目标必须是周期奖励，并在满足 `unlock-after` 后才开始累计有效保底周期。保底计数随玩家的未满周期进度一同持久化，离开区域或重启服务器不会清除；超过进度保留期时会一起清零。
+
 ## 单次挂机里程碑
 
 ```yaml
@@ -67,4 +89,7 @@ rewards:
 
 - “触发方式”按钮在“周期抽取”和“单次挂机里程碑”之间切换。
 - “概率解锁时间/里程碑时间”按钮通过聊天输入时间。
+- “权重”按钮通过聊天输入正数；独立概率模式仍使用 `chance`。
 - 切换为里程碑时，如果当前时间为零，会自动设置成 `30m`。
+
+在方案界面点击“方案抽取设置”可切换抽取模式、设置多抽数量，并输入 `20:3` 形式的保底规则；输入 `off` 可关闭保底。

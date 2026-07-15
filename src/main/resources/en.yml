@@ -8,6 +8,8 @@ common:
   disabled: "Disabled"
 actionbar:
   format: ":clock: <yellow>AFK <white>{session_time}  :gift: <yellow>Next <white>{next_reward}  :coin: <green>Earned {earned}"
+bossbar:
+  format: "<gold>{pool}</gold> <gray>|</gray> <yellow>Next {next_reward}</yellow> <gray>|</gray> <green>{event} ×{multiplier}</green>"
 session:
   no-pool: "<gold>[IdlePool]</gold> <red>You are not inside an AFK pool."
   no-permission: "<gold>[IdlePool]</gold> <red>You cannot use this AFK pool."
@@ -18,10 +20,18 @@ session:
   left-region: "<gold>[IdlePool]</gold> <yellow>You left the AFK pool. Your progress was saved."
   progress-loading: "<gold>[IdlePool]</gold> <gray>Loading your AFK progress…"
   milestone-reached: "<gold>[IdlePool]</gold> <green>Reached {time}; milestone rewards settled ({earned} granted)."
+  start-cancelled: "<gold>[IdlePool]</gold> <yellow>Another plugin cancelled this AFK start."
+  pity-triggered: "<gold>[IdlePool]</gold> <light_purple>The cycle pity reward was triggered!"
 command:
   no-permission: "<red>You do not have permission to use this command."
   players-only: "<red>Only players can use this command."
   reload-success: "<green>IdlePool configuration and messages reloaded."
+event:
+  usage: "<yellow>Usage: /afkpool event <list|start|stop> [event-id]"
+  failed: "<red>Event operation failed: {error}"
+  changed: "<green>Event {id} is now {state}."
+  header: "<gold>=== AFK Multiplier Events ==="
+  entry: "<yellow>{id}</yellow> <gray>({state})</gray> {name} <white>progress×{progress} item×{item} money×{money}"
 itemsadder:
   status:
     ready: "Ready (resources loaded)"
@@ -67,6 +77,8 @@ doctor:
   invalid-vanilla-item: "<red>✘ Plan {plan} has an invalid vanilla item: {item}."
   provider-missing: "<yellow>⚠ Plan {plan} uses {provider}, but {plugin} is disabled."
   itemsadder-item-missing: "<red>✘ ItemsAdder item does not exist: {item}."
+  no-positive-weight: "<red>✘ Plan {plan} uses weighted selection but has no positive-weight cycle reward."
+  invalid-pity: "<red>✘ Plan {plan} has an invalid pity target or the target is not a cycle reward."
   separator: "<gray>-------------------------"
   success: "<green>Check complete: no errors, {warnings} warning(s)."
   failure: "<red>Check complete: {errors} error(s)."
@@ -106,6 +118,52 @@ inbox:
     lore: ["<gray>Showing: <white>{count} entries", "<yellow>Click a reward to claim it."]
   item:
     lore: ["<gray>Amount: <white>{amount}", "<gray>Provider: <white>{provider}", "<gray>Pool: <white>{pool}", "", "<yellow>Click to claim"]
+stats:
+  loading: "<gray>Loading AFK statistics…"
+  load-failed: "<red>Could not load AFK statistics. Try again later."
+  title: "<gold>{player}'s AFK Statistics"
+  top-title: "<gold>AFK Leaderboard: {period}"
+  periods: { day: "Today", week: "This Week", month: "This Month", total: "All Time" }
+  unranked: "Unranked"
+  summary:
+    name: "<gold>{player} | {period}"
+    lore: ["<gray>AFK time: <white>{time}", "<gray>Cycles: <white>{cycles}", "<gray>Rewards: <white>{rewards}", "<gray>Longest session: <white>{longest}", "<gray>Rank: <yellow>{rank}"]
+  open-top: { name: "<yellow>Open Leaderboard", lore: ["<gray>View rankings for this period."] }
+  period: { name: "<yellow>{period}", lore: ["<gray>Click to change period."] }
+  top-entry:
+    name: "<gold>#{rank} <white>{player}"
+    lore: ["<gray>AFK time: <white>{time}", "<gray>Cycles: <white>{cycles}", "<gray>Rewards: <white>{rewards}"]
+  back: { name: "<yellow>Back to My Statistics", lore: [] }
+operations:
+  title: "<gold>IdlePool Operations"
+  loading: "<gray>Loading operations data…"
+  load-failed: "<red>Could not load operations data."
+  review: { name: "<yellow>Claim Review", lore: ["<gray>Resolve inbox entries in REVIEW state."] }
+  logs: { name: "<aqua>Reward Ledger", lore: ["<gray>Inspect successful, failed and processing settlements."] }
+  export: { name: "<green>Export CSV", lore: ["<gray>Export the complete reward ledger."] }
+  back: { name: "<yellow>Back", lore: [] }
+  review-title: "<gold>Claim Review | {count} entries"
+  review-detail-title: "<red>Review Entry #{id}"
+  review-entry:
+    name: "<yellow>#{id} {item} ×{amount}"
+    lore: ["<gray>Player: <white>{player}", "<gray>Reason: <white>{reason}", "", "<yellow>Click to resolve"]
+  restore: { name: "<green>Restore to Inbox", lore: ["<gray>Allow the player to claim it again."] }
+  confirm: { name: "<aqua>Confirm Delivered", lore: ["<gray>Remove without reissuing."] }
+  void: { name: "<red>Void Entry", lore: ["<gray>Delete the reward and record an audit entry."] }
+  log-title: "<gold>Reward Ledger | {status} | {count} entries"
+  history-title: "<gold>My Reward History | {count} entries"
+  log-entry:
+    name: "<yellow>{type} | {key}"
+    lore: ["<gray>Amount: <white>{amount}", "<gray>Pool: <white>{pool}", "<gray>Status: <white>{status}", "<gray>Time: <white>{time}", "<gray>Settlement: <white>{id}", "<gray>Detail: <white>{detail}"]
+  log-filter: { name: "<yellow>Status Filter: {status}", lore: ["<gray>Click to cycle all/success/failed/processing."] }
+  previous: { name: "<yellow>Previous Page", lore: [] }
+  next: { name: "<yellow>Next Page", lore: [] }
+  exporting: "<gray>Exporting reward ledger…"
+  exported: "<green>Exported {count} entries to {file}."
+  export-failed: "<red>Reward ledger export failed."
+  resolving: "<gray>Saving review action…"
+  resolved: "<green>Review completed: {action}."
+  resolve-failed: "<red>Review failed; another administrator may have resolved it."
 admin:
   input:
     prompt: "<gold>[IdlePool]</gold> {prompt}; type <red>cancel</red> to cancel."
@@ -127,6 +185,8 @@ admin:
     invalid-amount: "The amount must be between 1 and 1,000,000"
     invalid-money: "The value must be greater than 0 and no more than 1 billion"
     invalid-chance: "Chance must be between 0 and 100"
+    invalid-weight: "Weight must be between 0 and 1,000,000"
+    invalid-pity: "Use cycles:reward-index, for example 20:3; use off to disable"
     reward-missing: "That reward no longer exists"
     milestone-zero: "A session milestone must be greater than 0"
     provider-format: "Use the format provider:item_id"
@@ -147,6 +207,7 @@ admin:
       reload: { name: "<green>Reload Configuration", lore: ["<gray>Reload all configuration files."] }
       create: { name: "<green>Create AFK Pool", lore: ["<gray>Create a pool at your current position."] }
       rewards: { name: "<green>Reward Plan Management", lore: ["<gray>Edit item, money and command rewards."] }
+      operations: { name: "<aqua>Operations and Review", lore: ["<gray>Inspect claims, ledger entries and exports."] }
     detail:
       title: "<gold>Edit: {id}"
       enabled: { name: "<green>Enabled", lore: ["<yellow>Click to toggle."] }
@@ -172,7 +233,7 @@ admin:
     saving: "<gray>Saving reward configuration…"
     no-held-item: "<red>Hold the item you want to add in your main hand."
     identified: "<gray>Detected item provider: <white>{provider}"
-    label: { cycle: "Cycle roll", milestone: "Session milestone", immediate: "Immediately" }
+    label: { cycle: "Cycle roll", milestone: "Session milestone", immediate: "Immediately", independent: "Independent chance", weighted-one: "Weighted one", weighted-multiple: "Weighted multiple" }
     prompt:
       create-plan: "Enter a new reward plan ID"
       add-command: "Enter a console command without the leading slash"
@@ -185,9 +246,12 @@ admin:
       unlock-cycle: "Enter an unlock time such as 30m; use 0 for immediate"
       unlock-milestone: "Enter a session milestone such as 30m or 2h"
       copy-plan: "Enter the ID for the copied reward plan"
+      weight: "Enter a reward weight greater than or equal to 0"
+      draw-count: "Enter the weighted-multiple draw count from 1 to 45"
+      pity: "Enter cycles:reward-index, such as 20:3; use off to disable pity"
     list:
       title: "<gold>Reward Plan Management"
-      entry: { name: "<yellow>{id}", lore: ["<gray>Rewards: <white>{count}", "<gray>Selection: <white>independent chance", "", "<yellow>Click to edit"] }
+      entry: { name: "<yellow>{id}", lore: ["<gray>Rewards: <white>{count}", "<gray>Selection: <white>{mode}", "", "<yellow>Click to edit"] }
       create: { name: "<green>Create Reward Plan", lore: ["<gray>Create an empty independent-chance plan."] }
       back: { name: "<yellow>Back to AFK Pools", lore: [] }
     plan:
@@ -198,6 +262,7 @@ admin:
       add-id: { name: "<green>Add by Item ID", lore: ["<gray>For items that require a template ID.", "<gray>Format: provider:item_id"] }
       back: { name: "<yellow>Back to Plan List", lore: [] }
       copy: { name: "<green>Copy Reward Plan", lore: ["<gray>Copies all rewards and timing settings."] }
+      settings: { name: "<aqua>Plan Draw Settings", lore: ["<gray>Current: <white>{mode}", "<yellow>Configure weights, draws and pity."] }
       delete: { name: "<red>Delete Reward Plan", lore: ["<gray>Requires confirmation."] }
     plan-delete:
       title: "<red>Delete reward plan {id}?"
@@ -209,12 +274,18 @@ admin:
       money: { name: "<yellow>Value: {value}", lore: ["<gray>Click to edit."] }
       command: { name: "<yellow>Edit Command", lore: ["<gray>Current: <white>{value}", "<gray>Click to edit."] }
       chance: { name: "<yellow>Chance: {value}%", lore: ["<gray>Click to enter 0–100."] }
+      weight: { name: "<light_purple>Weight: {value}", lore: ["<gray>Relative chance in weighted modes.", "<yellow>Click to edit."] }
       trigger-cycle: { name: "<yellow>Trigger: {value}", lore: ["<gray>Rolls each cycle after unlocking.", "<yellow>Click to use a session milestone."] }
       trigger-milestone: { name: "<yellow>Trigger: {value}", lore: ["<gray>Settles once when the session reaches the time.", "<yellow>Click to use cycle rolls."] }
       unlock-cycle: { name: "<yellow>Unlock Time: {value}", lore: ["<gray>Excluded from cycle rolls before this time.", "<yellow>Enter 30m, 2h or 0."] }
       unlock-milestone: { name: "<yellow>Milestone Time: {value}", lore: ["<gray>Settles when this session crosses the time.", "<yellow>Enter a value such as 30m or 2h."] }
       delete: { name: "<red>Delete Reward", lore: ["<gray>Requires confirmation."] }
       back: { name: "<yellow>Back to Reward Plan", lore: [] }
+    settings:
+      title: "<gold>Plan Settings: {id}"
+      mode: { name: "<yellow>Selection Mode: {mode}", lore: ["<gray>Independent/weighted one/weighted multiple", "<yellow>Click to cycle."] }
+      draw-count: { name: "<yellow>Draw Count: {count}", lore: ["<gray>Used by weighted-multiple mode.", "<yellow>Click to edit."] }
+      pity: { name: "<light_purple>Cycle Pity: {status}", lore: ["<gray>Forces reward #{index} after {cycles} missed cycles.", "<yellow>Click to configure or disable."] }
     delete:
       title: "<red>Delete this reward?"
       confirm: { name: "<green>Confirm Delete", lore: ["<red>This cannot be undone."] }
@@ -223,7 +294,7 @@ admin:
       item-name: "<yellow>{provider}:{id}"
       money-name: "<gold>Vault Currency ×{amount}"
       command-name: "<aqua>Command Reward"
-      lore: ["<gray>Index: <white>{index}", "<gray>Chance: <white>{chance}%", "<gray>Trigger: <white>{trigger}", "<gray>Time: <white>{time}"]
+      lore: ["<gray>Index: <white>{index}", "<gray>Chance: <white>{chance}%", "<gray>Weight: <white>{weight}", "<gray>Trigger: <white>{trigger}", "<gray>Time: <white>{time}"]
       item-amount: "<gray>Amount: <white>{amount}"
       command: "<gray>Command: <white>{command}"
       footer: ["", "<yellow>Click to edit"]

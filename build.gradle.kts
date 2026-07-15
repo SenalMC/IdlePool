@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "top.cnuo"
-version = "1.1.0"
+version = "1.2.0"
 
 repositories {
     mavenCentral()
@@ -161,6 +161,10 @@ tasks {
         }
         from("docs/release-checklist.md") {
             into("docs")
+        }
+        from(".gitbook.yaml")
+        from("wiki") {
+            into("wiki")
         }
     }
 }

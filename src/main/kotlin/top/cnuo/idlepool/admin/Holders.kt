@@ -13,7 +13,7 @@ class AdminGuiHolder(val view: View, val poolId: String) : InventoryHolder {
 }
 
 class RewardAdminGuiHolder(val view: View, val planId: String, val rewardIndex: Int) : InventoryHolder {
-    enum class View { PLAN_LIST, PLAN_DETAIL, REWARD_DETAIL, DELETE_CONFIRM, PLAN_DELETE_CONFIRM }
+    enum class View { PLAN_LIST, PLAN_DETAIL, PLAN_SETTINGS, REWARD_DETAIL, DELETE_CONFIRM, PLAN_DELETE_CONFIRM }
     private lateinit var attached: Inventory
     fun view() = view
     fun planId() = planId

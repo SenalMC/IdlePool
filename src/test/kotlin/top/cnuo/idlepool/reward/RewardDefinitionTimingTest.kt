@@ -12,5 +12,5 @@ class RewardDefinitionTimingTest {
         assertTrue(milestone.milestoneCrossed(3599, 3600)); assertFalse(milestone.milestoneCrossed(3600, 3601)); assertFalse(milestone.eligibleForCycle(7200))
     }
     @Test fun `milestone requires positive time`() { assertThrows(IllegalArgumentException::class.java) { reward(RewardTrigger.SESSION_MILESTONE, Duration.ZERO) } }
-    private fun reward(trigger: RewardTrigger, time: Duration) = RewardDefinition(RewardType.ITEM, "vanilla", "DIAMOND", 1, 0.0, "", 100.0, trigger, time)
+    private fun reward(trigger: RewardTrigger, time: Duration) = RewardDefinition(RewardType.ITEM, "vanilla", "DIAMOND", 1, 0.0, "", 100.0, 100.0, trigger, time)
 }

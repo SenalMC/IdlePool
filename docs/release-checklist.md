@@ -2,7 +2,7 @@
 
 ## 文件安装
 
-- [ ] 将 `plugins/IdlePool-1.1.0.jar` 放入服务端 `plugins`。
+- [ ] 将 `plugins/IdlePool-1.2.0.jar` 放入服务端 `plugins`。
 - [ ] 如需 IA 图标，将 `ItemsAdder/contents/idlepool` 放入 `plugins/ItemsAdder/contents`。
 - [ ] 从 rc.1 升级且继续使用 IA 时，删除 `contents/idlepool/textures/font/gui` 旧背景目录，或使用 `install.ps1`。
 - [ ] 如需 IA 图标或 IA 奖励物品，安装与服务端版本兼容的 ItemsAdder 4.x。
@@ -38,6 +38,13 @@
 - [ ] 模拟数据库领取提交失败时奖励进入 REVIEW，不会再次显示为可领取。
 - [ ] v1.0 配置升级后生成 `.v1.bak`，语言缺失键能使用内置值回退。
 - [ ] 安装 PlaceholderAPI 后验证 `%idlepool_session_time%` 与 `%idlepool_inbox_count%`。
+- [ ] v1.1 数据库升级到 schema 3，统计、会话检查点和管理员审计表存在。
+- [ ] 独立概率、权重单抽、权重多抽和周期保底分别完成结算测试。
+- [ ] `/afkpool stats`、`top`、`history`、`event` 和运营中心可用。
+- [ ] REVIEW 记录可以恢复、确认或作废，并生成管理员审计日志。
+- [ ] 活动倍率分别影响进度、物品与 Vault 货币，命令奖励保持单次执行。
+- [ ] BossBar 开关和新增 PlaceholderAPI 变量验证通过。
+- [ ] `wiki/SUMMARY.md` 内全部相对链接有效。
 - [ ] 重启服务器后进度和暂存奖励仍然存在。
 
 ## 上线前备份

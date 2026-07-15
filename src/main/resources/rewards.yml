@@ -1,11 +1,19 @@
 # 配置结构版本；Configuration schema version.
-schema-version: 2
+schema-version: 3
 
 # 奖励方案示例；每项奖励独立判定概率。
 # Reward plan example; every reward rolls its chance independently.
 reward-plans:
   basic:
     selection-mode: independent
+    # weighted-multiple 模式每周期抽取数量；Draw count for weighted-multiple mode.
+    draw-count: 1
+    # 周期保底；reward-index 从 1 开始。Cycle pity; reward-index is one-based.
+    pity:
+      enabled: false
+      after-cycles: 20
+      reward-index: 1
+      reset-on-win: true
     rewards:
       # 周期奖励：连续挂机满 30 分钟后，才会在每个周期中以 10% 概率获得。
       # Cycle reward: unlocks after 30 minutes, then has a 10% chance each cycle.
@@ -14,6 +22,7 @@ reward-plans:
         id: DIAMOND
         amount: 1
         chance: 10.0
+        weight: 10.0
         trigger: cycle
         unlock-after: 30m
       # 立即解锁的普通周期奖励。
@@ -23,6 +32,7 @@ reward-plans:
         id: GOLD_NUGGET
         amount: 1
         chance: 100.0
+        weight: 100.0
         trigger: cycle
         unlock-after: 0s
       # 单次挂机里程碑：本次连续挂机到达 1 小时时额外结算一次。
@@ -30,5 +40,6 @@ reward-plans:
       - type: command
         command: "say {player} 连续挂机已满一小时"
         chance: 100.0
+        weight: 100.0
         trigger: session-milestone
         unlock-after: 1h

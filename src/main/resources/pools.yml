@@ -1,5 +1,5 @@
 # 配置结构版本；Configuration schema version.
-schema-version: 2
+schema-version: 3
 
 # 挂机池示例；可使用 /afkpool admin 在游戏内创建和编辑。
 # AFK pool example; use /afkpool admin to create and edit pools in game.

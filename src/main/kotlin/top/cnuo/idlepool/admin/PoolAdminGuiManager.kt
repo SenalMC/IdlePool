@@ -43,6 +43,7 @@ class PoolAdminGuiManager(
         inventory.setItem(45, keyed(Material.ANVIL, "admin.pool.list.create"))
         inventory.setItem(47, keyed(Material.EMERALD, "admin.pool.list.rewards"))
         inventory.setItem(49, keyed(Material.RECOVERY_COMPASS, "admin.pool.list.reload"))
+        inventory.setItem(51, keyed(Material.ENDER_EYE, "admin.pool.list.operations"))
         player.openInventory(inventory)
     }
 
@@ -101,6 +102,7 @@ class PoolAdminGuiManager(
         45 -> request(player, PendingInput(InputKind.CREATE, "", ""), "admin.pool.prompt.create")
         47 -> player.performCommand("afkpool admin rewards")
         49 -> { plugin.reloadIdlePool(); openList(player) }
+        51 -> player.performCommand("afkpool admin operations")
         else -> slots.indexOf(slot).takeIf { it >= 0 }?.let { pools.all().getOrNull(it) }?.let { openDetail(player, it) }
     }
 

@@ -10,6 +10,9 @@ common:
 actionbar:
   format: ":clock: <yellow>挂机 <white>{session_time}  :gift: <yellow>下次奖励 <white>{next_reward}  :coin: <green>本次 {earned}"
 
+bossbar:
+  format: "<gold>{pool}</gold> <gray>|</gray> <yellow>下次 {next_reward}</yellow> <gray>|</gray> <green>{event} ×{multiplier}</green>"
+
 session:
   no-pool: "<gold>[挂机池]</gold> <red>你当前不在挂机池区域内。"
   no-permission: "<gold>[挂机池]</gold> <red>你没有使用这个挂机池的权限。"
@@ -20,11 +23,20 @@ session:
   left-region: "<gold>[挂机池]</gold> <yellow>你离开了挂机池，进度已保存。"
   progress-loading: "<gold>[挂机池]</gold> <gray>正在读取你的挂机进度……"
   milestone-reached: "<gold>[挂机池]</gold> <green>连续挂机达到 <white>{time}</white>，里程碑奖励已结算，本次获得 <white>{earned}</white> 项。"
+  start-cancelled: "<gold>[挂机池]</gold> <yellow>本次挂机开始被其他插件取消。"
+  pity-triggered: "<gold>[挂机池]</gold> <light_purple>本周期触发了保底奖励！"
 
 command:
   no-permission: "<red>你没有权限执行这个命令。"
   players-only: "<red>只有玩家可以使用这个命令。"
   reload-success: "<green>IdlePool 配置与语言文件已重载。"
+
+event:
+  usage: "<yellow>用法：/afkpool event <list|start|stop> [活动ID]"
+  failed: "<red>活动操作失败：{error}"
+  changed: "<green>活动 {id} 现已{state}。"
+  header: "<gold>=== 挂机倍率活动 ==="
+  entry: "<yellow>{id}</yellow> <gray>({state})</gray> {name} <white>进度×{progress} 物品×{item} 货币×{money}"
 
 itemsadder:
   status:
@@ -76,6 +88,8 @@ doctor:
   invalid-vanilla-item: "<red>✘ 奖励方案 {plan} 的原版物品无效：{item}。"
   provider-missing: "<yellow>⚠ 奖励方案 {plan} 使用 {provider}，但插件 {plugin} 未启用。"
   itemsadder-item-missing: "<red>✘ ItemsAdder 物品不存在：{item}。"
+  no-positive-weight: "<red>✘ 奖励方案 {plan} 使用权重模式，但没有正权重周期奖励。"
+  invalid-pity: "<red>✘ 奖励方案 {plan} 的保底序号无效或目标不是周期奖励。"
   separator: "<gray>-------------------------"
   success: "<green>检查完成：无错误，{warnings} 个警告。"
   failure: "<red>检查完成：发现 {errors} 个错误。"
@@ -133,6 +147,56 @@ inbox:
       - ""
       - "<yellow>点击领取"
 
+# 玩家统计与排行榜；Player statistics and leaderboards.
+stats:
+  loading: "<gray>正在读取挂机统计……"
+  load-failed: "<red>无法读取挂机统计，请稍后重试。"
+  title: "<gold>{player} 的挂机统计"
+  top-title: "<gold>挂机排行榜：{period}"
+  periods: { day: "今日", week: "本周", month: "本月", total: "总计" }
+  unranked: "未上榜"
+  summary:
+    name: "<gold>{player}｜{period}"
+    lore: ["<gray>挂机时长：<white>{time}", "<gray>完成周期：<white>{cycles}", "<gray>奖励数量：<white>{rewards}", "<gray>最长单次：<white>{longest}", "<gray>当前排名：<yellow>{rank}"]
+  open-top: { name: "<yellow>查看排行榜", lore: ["<gray>查看当前统计周期的排名。"] }
+  period: { name: "<yellow>{period}", lore: ["<gray>点击切换统计周期。"] }
+  top-entry:
+    name: "<gold>#{rank} <white>{player}"
+    lore: ["<gray>挂机时长：<white>{time}", "<gray>完成周期：<white>{cycles}", "<gray>奖励数量：<white>{rewards}"]
+  back: { name: "<yellow>返回个人统计", lore: [] }
+
+# 奖励复核与流水；Reward review and ledger.
+operations:
+  title: "<gold>IdlePool 运营中心"
+  loading: "<gray>正在读取运营数据……"
+  load-failed: "<red>运营数据读取失败。"
+  review: { name: "<yellow>异常领取复核", lore: ["<gray>处理处于 REVIEW 状态的暂存奖励。"] }
+  logs: { name: "<aqua>奖励流水", lore: ["<gray>查询成功、失败和处理中的结算记录。"] }
+  export: { name: "<green>导出 CSV", lore: ["<gray>导出完整奖励流水。"] }
+  back: { name: "<yellow>返回", lore: [] }
+  review-title: "<gold>异常复核｜{count} 条"
+  review-detail-title: "<red>复核记录 #{id}"
+  review-entry:
+    name: "<yellow>#{id} {item} ×{amount}"
+    lore: ["<gray>玩家：<white>{player}", "<gray>原因：<white>{reason}", "", "<yellow>点击处理"]
+  restore: { name: "<green>恢复到暂存箱", lore: ["<gray>重新允许玩家领取。"] }
+  confirm: { name: "<aqua>确认已经领取", lore: ["<gray>删除记录，不再补发。"] }
+  void: { name: "<red>作废记录", lore: ["<gray>删除异常奖励并记录审计。"] }
+  log-title: "<gold>奖励流水｜{status}｜{count} 条"
+  history-title: "<gold>我的奖励记录｜{count} 条"
+  log-entry:
+    name: "<yellow>{type}｜{key}"
+    lore: ["<gray>数量：<white>{amount}", "<gray>挂机池：<white>{pool}", "<gray>状态：<white>{status}", "<gray>时间：<white>{time}", "<gray>结算：<white>{id}", "<gray>详情：<white>{detail}"]
+  log-filter: { name: "<yellow>状态筛选：{status}", lore: ["<gray>点击切换全部/成功/失败/处理中。"] }
+  previous: { name: "<yellow>上一页", lore: [] }
+  next: { name: "<yellow>下一页", lore: [] }
+  exporting: "<gray>正在导出奖励流水……"
+  exported: "<green>已导出 {count} 条记录到 {file}。"
+  export-failed: "<red>奖励流水导出失败。"
+  resolving: "<gray>正在提交复核操作……"
+  resolved: "<green>复核完成：{action}。"
+  resolve-failed: "<red>复核失败，记录可能已被其他管理员处理。"
+
 # 游戏内管理员 GUI 与聊天输入。
 # In-game administrator GUI and chat input.
 admin:
@@ -156,6 +220,8 @@ admin:
     invalid-amount: "数量必须在 1～1000000 之间"
     invalid-money: "金额必须大于 0 且不超过 10 亿"
     invalid-chance: "概率必须在 0～100 之间"
+    invalid-weight: "权重必须在 0～1,000,000 之间"
+    invalid-pity: "保底格式应为 周期数:奖励序号，例如 20:3；输入 off 关闭"
     reward-missing: "奖励已经不存在"
     milestone-zero: "单次挂机里程碑时间必须大于 0"
     provider-format: "格式应为 provider:item_id"
@@ -187,6 +253,9 @@ admin:
       rewards:
         name: "<green>奖励方案管理"
         lore: ["<gray>创建和编辑物品、货币及命令奖励。"]
+      operations:
+        name: "<aqua>运营与复核中心"
+        lore: ["<gray>查看异常领取、奖励流水和导出。"]
     detail:
       title: "<gold>编辑：{id}"
       enabled: { name: "<green>已启用", lore: ["<yellow>点击切换状态"] }
@@ -216,6 +285,9 @@ admin:
       cycle: "周期抽取"
       milestone: "单次挂机里程碑"
       immediate: "立即"
+      independent: "独立概率"
+      weighted-one: "权重单抽"
+      weighted-multiple: "权重多抽"
     prompt:
       create-plan: "请输入新奖励方案 ID"
       add-command: "请输入控制台命令，不需要开头的 /"
@@ -228,11 +300,14 @@ admin:
       unlock-cycle: "请输入概率解锁时间，例如 30m；输入 0 表示立即参与"
       unlock-milestone: "请输入单次挂机里程碑时间，例如 30m 或 2h"
       copy-plan: "请输入复制后的新奖励方案 ID"
+      weight: "请输入奖励权重，必须大于等于 0"
+      draw-count: "请输入权重多抽的抽取数量 1～45"
+      pity: "请输入 周期数:奖励序号，例如 20:3；输入 off 关闭保底"
     list:
       title: "<gold>奖励方案管理"
       entry:
         name: "<yellow>{id}"
-        lore: ["<gray>奖励数量：<white>{count}", "<gray>抽取模式：<white>独立概率", "", "<yellow>点击编辑"]
+        lore: ["<gray>奖励数量：<white>{count}", "<gray>抽取模式：<white>{mode}", "", "<yellow>点击编辑"]
       create: { name: "<green>创建奖励方案", lore: ["<gray>创建一个空的独立概率奖池。"] }
       back: { name: "<yellow>返回挂机池管理", lore: [] }
     plan:
@@ -243,6 +318,7 @@ admin:
       add-id: { name: "<green>通过物品 ID 添加", lore: ["<gray>适合需要指定模板 ID 的物品。", "<gray>格式：provider:item_id"] }
       back: { name: "<yellow>返回方案列表", lore: [] }
       copy: { name: "<green>复制奖励方案", lore: ["<gray>复制全部奖励和时间参数。"] }
+      settings: { name: "<aqua>方案抽取设置", lore: ["<gray>当前：<white>{mode}", "<yellow>设置权重、抽取次数和保底。"] }
       delete: { name: "<red>删除奖励方案", lore: ["<gray>点击后需要再次确认。"] }
     plan-delete:
       title: "<red>确认删除奖励方案 {id}？"
@@ -254,12 +330,18 @@ admin:
       money: { name: "<yellow>金额：{value}", lore: ["<gray>点击修改。"] }
       command: { name: "<yellow>编辑命令", lore: ["<gray>当前：<white>{value}", "<gray>点击修改。"] }
       chance: { name: "<yellow>概率：{value}%", lore: ["<gray>点击输入 0～100。"] }
+      weight: { name: "<light_purple>权重：{value}", lore: ["<gray>权重模式下用于相对概率。", "<yellow>点击修改。"] }
       trigger-cycle: { name: "<yellow>触发方式：{value}", lore: ["<gray>解锁后参与每个普通周期抽取。", "<yellow>点击切换为单次挂机里程碑。"] }
       trigger-milestone: { name: "<yellow>触发方式：{value}", lore: ["<gray>本次连续挂机到达时间时仅结算一次。", "<yellow>点击切换为普通周期抽取。"] }
       unlock-cycle: { name: "<yellow>概率解锁时间：{value}", lore: ["<gray>在此之前不会进入周期抽取。", "<yellow>点击输入，例如 30m、2h 或 0"] }
       unlock-milestone: { name: "<yellow>里程碑时间：{value}", lore: ["<gray>连续挂机跨过此时间时额外结算。", "<yellow>点击输入，例如 30m、2h"] }
       delete: { name: "<red>删除奖励", lore: ["<gray>点击后需要再次确认。"] }
       back: { name: "<yellow>返回奖励方案", lore: [] }
+    settings:
+      title: "<gold>方案设置：{id}"
+      mode: { name: "<yellow>抽取模式：{mode}", lore: ["<gray>独立概率/权重单抽/权重多抽", "<yellow>点击循环切换。"] }
+      draw-count: { name: "<yellow>抽取数量：{count}", lore: ["<gray>仅权重多抽模式使用。", "<yellow>点击修改。"] }
+      pity: { name: "<light_purple>周期保底：{status}", lore: ["<gray>连续 {cycles} 个周期未获得奖励 #{index} 时触发。", "<yellow>点击配置或关闭。"] }
     delete:
       title: "<red>确认删除奖励？"
       confirm: { name: "<green>确认删除", lore: ["<red>此操作不可撤销。"] }
@@ -268,7 +350,7 @@ admin:
       item-name: "<yellow>{provider}:{id}"
       money-name: "<gold>Vault 货币 ×{amount}"
       command-name: "<aqua>命令奖励"
-      lore: ["<gray>序号：<white>{index}", "<gray>概率：<white>{chance}%", "<gray>触发：<white>{trigger}", "<gray>时间：<white>{time}"]
+      lore: ["<gray>序号：<white>{index}", "<gray>概率：<white>{chance}%", "<gray>权重：<white>{weight}", "<gray>触发：<white>{trigger}", "<gray>时间：<white>{time}"]
       item-amount: "<gray>数量：<white>{amount}"
       command: "<gray>命令：<white>{command}"
       footer: ["", "<yellow>点击编辑"]

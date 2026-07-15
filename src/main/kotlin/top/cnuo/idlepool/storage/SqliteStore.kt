@@ -2,25 +2,52 @@ package top.cnuo.idlepool.storage
 
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.temporal.WeekFields
+import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.Level
+import java.util.logging.Logger
 
-class SqliteStore(private val plugin: JavaPlugin, databaseFile: File) : AutoCloseable {
+class SqliteStore private constructor(
+    private val retentionDays: () -> Int,
+    private val statisticsTimeZone: () -> String,
+    private val logger: Logger,
+    databaseFile: File,
+) : AutoCloseable {
+    constructor(plugin: JavaPlugin, databaseFile: File) : this(
+        retentionDays = { plugin.config.getInt("storage.reward-log-retention-days", 90).coerceAtLeast(1) },
+        statisticsTimeZone = { plugin.config.getString("statistics.time-zone", ZoneId.systemDefault().id) ?: ZoneId.systemDefault().id },
+        logger = plugin.logger,
+        databaseFile = databaseFile,
+    )
+
+    internal constructor(
+        databaseFile: File,
+        retentionDays: Int = 90,
+        statisticsTimeZone: String = "UTC",
+        logger: Logger = Logger.getLogger("IdlePool-Test"),
+    ) : this({ retentionDays.coerceAtLeast(1) }, { statisticsTimeZone }, logger, databaseFile)
+
     private val jdbcUrl: String
     private val executor = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "IdlePool-Storage").apply { isDaemon = true }
     }
     private val inboxCounts = ConcurrentHashMap<UUID, Int>()
+    private val statsCache = ConcurrentHashMap<Pair<UUID, StatsPeriod>, PlayerStats>()
 
     init {
         databaseFile.parentFile?.let { require(it.exists() || it.mkdirs()) { "Cannot create database directory: $it" } }
@@ -70,11 +97,48 @@ class SqliteStore(private val plugin: JavaPlugin, databaseFile: File) : AutoClos
                         )
                     """.trimIndent())
                     statement.execute("CREATE TABLE IF NOT EXISTS idlepool_meta (meta_key TEXT PRIMARY KEY, meta_value TEXT NOT NULL)")
-                    statement.execute("INSERT INTO idlepool_meta(meta_key, meta_value) VALUES ('schema_version', '2') ON CONFLICT(meta_key) DO UPDATE SET meta_value='2'")
+                    addColumn(connection, "player_pool_progress", "pity_count", "INTEGER NOT NULL DEFAULT 0")
+                    statement.execute("""
+                        CREATE TABLE IF NOT EXISTS session_stats_checkpoint (
+                            session_id TEXT PRIMARY KEY, player_uuid TEXT NOT NULL, player_name TEXT NOT NULL,
+                            pool_id TEXT NOT NULL, seconds INTEGER NOT NULL, cycles INTEGER NOT NULL,
+                            rewards INTEGER NOT NULL, updated_at INTEGER NOT NULL
+                        )
+                    """.trimIndent())
+                    statement.execute("""
+                        CREATE TABLE IF NOT EXISTS player_stats (
+                            player_uuid TEXT NOT NULL, pool_id TEXT NOT NULL, player_name TEXT NOT NULL,
+                            total_seconds INTEGER NOT NULL DEFAULT 0, cycles INTEGER NOT NULL DEFAULT 0,
+                            rewards INTEGER NOT NULL DEFAULT 0, longest_session INTEGER NOT NULL DEFAULT 0,
+                            updated_at INTEGER NOT NULL, PRIMARY KEY(player_uuid,pool_id)
+                        )
+                    """.trimIndent())
+                    statement.execute("""
+                        CREATE TABLE IF NOT EXISTS player_period_stats (
+                            period_type TEXT NOT NULL, period_key TEXT NOT NULL, player_uuid TEXT NOT NULL,
+                            pool_id TEXT NOT NULL, player_name TEXT NOT NULL, seconds INTEGER NOT NULL DEFAULT 0,
+                            cycles INTEGER NOT NULL DEFAULT 0, rewards INTEGER NOT NULL DEFAULT 0,
+                            updated_at INTEGER NOT NULL,
+                            PRIMARY KEY(period_type,period_key,player_uuid,pool_id)
+                        )
+                    """.trimIndent())
+                    statement.execute("CREATE INDEX IF NOT EXISTS idx_period_stats_rank ON player_period_stats(period_type,period_key,seconds DESC)")
+                    statement.execute("""
+                        CREATE TABLE IF NOT EXISTS admin_audit_log (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT, admin_name TEXT NOT NULL, action TEXT NOT NULL,
+                            target_type TEXT NOT NULL, target_id TEXT NOT NULL, detail TEXT NOT NULL DEFAULT '',
+                            created_at INTEGER NOT NULL
+                        )
+                    """.trimIndent())
+                    statement.execute("CREATE INDEX IF NOT EXISTS idx_admin_audit_time ON admin_audit_log(created_at DESC)")
+                    statement.execute("""
+                        INSERT OR IGNORE INTO player_stats(player_uuid,pool_id,player_name,total_seconds,cycles,rewards,longest_session,updated_at)
+                        SELECT player_uuid,pool_id,substr(player_uuid,1,8),total_seconds,0,0,0,updated_at FROM player_pool_progress
+                    """.trimIndent())
+                    statement.execute("INSERT INTO idlepool_meta(meta_key, meta_value) VALUES ('schema_version', '3') ON CONFLICT(meta_key) DO UPDATE SET meta_value='3'")
                     // Unknown outcome after a crash is never returned to PENDING automatically: this prevents duplication.
                     statement.execute("UPDATE reward_inbox SET status='REVIEW' WHERE status='CLAIMING'")
-                    val retentionDays = plugin.config.getInt("storage.reward-log-retention-days", 90).coerceAtLeast(1)
-                    val cutoff = now() - TimeUnit.DAYS.toSeconds(retentionDays.toLong())
+                    val cutoff = now() - TimeUnit.DAYS.toSeconds(retentionDays().toLong())
                     connection.prepareStatement("DELETE FROM reward_ledger WHERE created_at < ? AND status IN ('SUCCESS','FAILED')").use {
                         it.setLong(1, cutoff)
                         it.executeUpdate()
@@ -82,6 +146,9 @@ class SqliteStore(private val plugin: JavaPlugin, databaseFile: File) : AutoClos
                     connection.prepareStatement("DELETE FROM inbox_claim_log WHERE created_at < ?").use {
                         it.setLong(1, cutoff)
                         it.executeUpdate()
+                    }
+                    connection.prepareStatement("DELETE FROM session_stats_checkpoint WHERE updated_at < ?").use {
+                        it.setLong(1, now() - TimeUnit.DAYS.toSeconds(2)); it.executeUpdate()
                     }
                 }
             }
@@ -92,12 +159,12 @@ class SqliteStore(private val plugin: JavaPlugin, databaseFile: File) : AutoClos
 
     fun loadProgress(playerId: UUID, poolId: String): CompletableFuture<ProgressRecord> = supplyAsync {
         open().use { connection -> connection.prepareStatement(
-            "SELECT progress_seconds,total_seconds,expires_at,reward_sequence FROM player_pool_progress WHERE player_uuid=? AND pool_id=?"
+            "SELECT progress_seconds,total_seconds,expires_at,reward_sequence,pity_count FROM player_pool_progress WHERE player_uuid=? AND pool_id=?"
         ).use { statement ->
             statement.setString(1, playerId.toString()); statement.setString(2, poolId)
             statement.executeQuery().use { result ->
                 if (!result.next()) ProgressRecord.empty() else ProgressRecord(
-                    result.getLong(1), result.getLong(2), result.getLong(3), result.getLong(4)
+                    result.getLong(1), result.getLong(2), result.getLong(3), result.getLong(4), result.getLong(5)
                 )
             }
         } }
@@ -105,15 +172,15 @@ class SqliteStore(private val plugin: JavaPlugin, databaseFile: File) : AutoClos
 
     fun saveProgress(playerId: UUID, poolId: String, progress: ProgressRecord): CompletableFuture<Void> = runAsync {
         open().use { connection -> connection.prepareStatement("""
-            INSERT INTO player_pool_progress(player_uuid,pool_id,progress_seconds,total_seconds,expires_at,reward_sequence,updated_at)
-            VALUES(?,?,?,?,?,?,?) ON CONFLICT(player_uuid,pool_id) DO UPDATE SET
+            INSERT INTO player_pool_progress(player_uuid,pool_id,progress_seconds,total_seconds,expires_at,reward_sequence,pity_count,updated_at)
+            VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(player_uuid,pool_id) DO UPDATE SET
             progress_seconds=excluded.progress_seconds,total_seconds=excluded.total_seconds,
-            expires_at=excluded.expires_at,reward_sequence=excluded.reward_sequence,updated_at=excluded.updated_at
+            expires_at=excluded.expires_at,reward_sequence=excluded.reward_sequence,pity_count=excluded.pity_count,updated_at=excluded.updated_at
         """.trimIndent()).use { statement ->
             statement.setString(1, playerId.toString()); statement.setString(2, poolId)
             statement.setLong(3, progress.progressSeconds); statement.setLong(4, progress.totalSeconds)
             statement.setLong(5, progress.expiresAtEpochSecond); statement.setLong(6, progress.rewardSequence)
-            statement.setLong(7, now()); statement.executeUpdate()
+            statement.setLong(7, progress.pityCount); statement.setLong(8, now()); statement.executeUpdate()
         } }
     }
 
@@ -235,6 +302,218 @@ class SqliteStore(private val plugin: JavaPlugin, databaseFile: File) : AutoClos
         open().use { connection -> countPending(connection, playerId).also { inboxCounts[playerId] = it } }
     }
 
+    fun recordSessionCheckpoint(checkpoint: SessionCheckpoint): CompletableFuture<Void> = runAsync {
+        transaction { connection ->
+            val previous = connection.prepareStatement("SELECT seconds,cycles,rewards FROM session_stats_checkpoint WHERE session_id=?").use {
+                it.setString(1, checkpoint.sessionId)
+                it.executeQuery().use { result -> if (result.next()) longArrayOf(result.getLong(1), result.getLong(2), result.getLong(3)) else longArrayOf(0, 0, 0) }
+            }
+            val seconds = (checkpoint.seconds - previous[0]).coerceAtLeast(0)
+            val cycles = (checkpoint.cycles - previous[1]).coerceAtLeast(0)
+            val rewards = (checkpoint.rewards - previous[2]).coerceAtLeast(0)
+            connection.prepareStatement("""
+                INSERT INTO session_stats_checkpoint(session_id,player_uuid,player_name,pool_id,seconds,cycles,rewards,updated_at)
+                VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(session_id) DO UPDATE SET
+                player_name=excluded.player_name,seconds=MAX(seconds,excluded.seconds),cycles=MAX(cycles,excluded.cycles),
+                rewards=MAX(rewards,excluded.rewards),updated_at=excluded.updated_at
+            """.trimIndent()).use {
+                it.setString(1, checkpoint.sessionId); it.setString(2, checkpoint.playerId.toString()); it.setString(3, checkpoint.playerName)
+                it.setString(4, checkpoint.poolId); it.setLong(5, checkpoint.seconds); it.setLong(6, checkpoint.cycles)
+                it.setLong(7, checkpoint.rewards); it.setLong(8, now()); it.executeUpdate()
+            }
+            if (seconds > 0 || cycles > 0 || rewards > 0) {
+                connection.prepareStatement("""
+                    INSERT INTO player_stats(player_uuid,pool_id,player_name,total_seconds,cycles,rewards,longest_session,updated_at)
+                    VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(player_uuid,pool_id) DO UPDATE SET
+                    player_name=excluded.player_name,total_seconds=total_seconds+excluded.total_seconds,
+                    cycles=cycles+excluded.cycles,rewards=rewards+excluded.rewards,
+                    longest_session=MAX(longest_session,excluded.longest_session),updated_at=excluded.updated_at
+                """.trimIndent()).use {
+                    it.setString(1, checkpoint.playerId.toString()); it.setString(2, checkpoint.poolId); it.setString(3, checkpoint.playerName)
+                    it.setLong(4, seconds); it.setLong(5, cycles); it.setLong(6, rewards); it.setLong(7, checkpoint.seconds); it.setLong(8, now()); it.executeUpdate()
+                }
+                listOf(StatsPeriod.DAY, StatsPeriod.WEEK, StatsPeriod.MONTH).forEach { period ->
+                    connection.prepareStatement("""
+                        INSERT INTO player_period_stats(period_type,period_key,player_uuid,pool_id,player_name,seconds,cycles,rewards,updated_at)
+                        VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(period_type,period_key,player_uuid,pool_id) DO UPDATE SET
+                        player_name=excluded.player_name,seconds=seconds+excluded.seconds,cycles=cycles+excluded.cycles,
+                        rewards=rewards+excluded.rewards,updated_at=excluded.updated_at
+                    """.trimIndent()).use {
+                        it.setString(1, period.name); it.setString(2, periodKey(period)); it.setString(3, checkpoint.playerId.toString())
+                        it.setString(4, checkpoint.poolId); it.setString(5, checkpoint.playerName); it.setLong(6, seconds)
+                        it.setLong(7, cycles); it.setLong(8, rewards); it.setLong(9, now()); it.executeUpdate()
+                    }
+                }
+                statsCache.keys.removeIf { it.first == checkpoint.playerId }
+            }
+        }
+    }
+
+    fun loadStats(playerId: UUID, period: StatsPeriod): CompletableFuture<PlayerStats> = supplyAsync {
+        open().use { connection -> readStats(connection, playerId, period).also { statsCache[playerId to period] = it } }
+    }
+
+    fun refreshStats(playerId: UUID): CompletableFuture<List<PlayerStats>> = supplyAsync {
+        open().use { connection -> StatsPeriod.entries.map { period -> readStats(connection, playerId, period).also { statsCache[playerId to period] = it } } }
+    }
+
+    fun cachedStats(playerId: UUID, period: StatsPeriod) = statsCache[playerId to period]
+
+    fun loadLeaderboard(period: StatsPeriod, limit: Int = 45): CompletableFuture<List<LeaderboardEntry>> = supplyAsync {
+        open().use { connection ->
+            val (source, where) = statsSource(period)
+            connection.prepareStatement("""
+                SELECT player_uuid,MAX(player_name),SUM(seconds) AS score,SUM(cycles),SUM(rewards)
+                FROM $source $where GROUP BY player_uuid ORDER BY score DESC,player_uuid LIMIT ?
+            """.trimIndent()).use { statement ->
+                var index = bindPeriod(statement, period)
+                statement.setInt(index, limit.coerceIn(1, 100))
+                statement.executeQuery().use { result -> buildList {
+                    var rank = 1
+                    while (result.next()) add(LeaderboardEntry(result.getString(1), result.getString(2), result.getLong(3), result.getLong(4), result.getLong(5), rank++))
+                } }
+            }
+        }
+    }
+
+    fun listRewardLogs(playerId: UUID?, status: String?, page: Int, pageSize: Int = 45): CompletableFuture<RewardLogPage> = supplyAsync {
+        open().use { connection ->
+            val clauses = mutableListOf<String>()
+            if (playerId != null) clauses += "player_uuid=?"
+            if (!status.isNullOrBlank() && !status.equals("ALL", true)) clauses += "status=?"
+            val where = if (clauses.isEmpty()) "" else "WHERE ${clauses.joinToString(" AND ")}"
+            fun bind(statement: java.sql.PreparedStatement, includePage: Boolean): Int {
+                var index = 1
+                if (playerId != null) statement.setString(index++, playerId.toString())
+                if (!status.isNullOrBlank() && !status.equals("ALL", true)) statement.setString(index++, status.uppercase(Locale.ROOT))
+                if (includePage) { statement.setInt(index++, pageSize.coerceIn(1, 45)); statement.setInt(index, page.coerceAtLeast(0) * pageSize.coerceIn(1, 45)) }
+                return index
+            }
+            val total = connection.prepareStatement("SELECT COUNT(*) FROM reward_ledger $where").use { bind(it, false); it.executeQuery().use { result -> result.next(); result.getInt(1) } }
+            val safeSize = pageSize.coerceIn(1, 45); val pages = maxOf(1, (total + safeSize - 1) / safeSize); val safePage = page.coerceIn(0, pages - 1)
+            val entries = connection.prepareStatement("SELECT settlement_id,player_uuid,pool_id,reward_type,reward_key,amount,status,detail,created_at,updated_at FROM reward_ledger $where ORDER BY created_at DESC LIMIT ? OFFSET ?").use {
+                var index = 1
+                if (playerId != null) it.setString(index++, playerId.toString())
+                if (!status.isNullOrBlank() && !status.equals("ALL", true)) it.setString(index++, status.uppercase(Locale.ROOT))
+                it.setInt(index++, safeSize); it.setInt(index, safePage * safeSize)
+                it.executeQuery().use { result -> buildList { while (result.next()) add(readRewardLog(result)) } }
+            }
+            RewardLogPage(entries, safePage, pages, total)
+        }
+    }
+
+    fun listReviews(page: Int, pageSize: Int = 45): CompletableFuture<ReviewPage> = supplyAsync {
+        open().use { connection ->
+            val safeSize = pageSize.coerceIn(1, 45)
+            val total = connection.createStatement().use { it.executeQuery("SELECT COUNT(*) FROM reward_inbox WHERE status='REVIEW'").use { result -> result.next(); result.getInt(1) } }
+            val pages = maxOf(1, (total + safeSize - 1) / safeSize); val safePage = page.coerceIn(0, pages - 1)
+            val sql = """
+                SELECT r.id,r.player_uuid,r.pool_id,r.provider,r.item_id,r.amount,r.display_name,
+                COALESCE(r.claim_token,''),COALESCE((SELECT detail FROM inbox_claim_log l WHERE l.claim_token=r.claim_token ORDER BY l.id DESC LIMIT 1),''),r.created_at
+                FROM reward_inbox r WHERE r.status='REVIEW' ORDER BY r.id DESC LIMIT ? OFFSET ?
+            """.trimIndent()
+            val entries = connection.prepareStatement(sql).use {
+                it.setInt(1, safeSize); it.setInt(2, safePage * safeSize)
+                it.executeQuery().use { result -> buildList { while (result.next()) add(ReviewEntry(
+                    result.getLong(1), result.getString(2), result.getString(3), result.getString(4), result.getString(5),
+                    result.getInt(6), result.getString(7), result.getString(8), result.getString(9), Instant.ofEpochSecond(result.getLong(10)),
+                )) } }
+            }
+            ReviewPage(entries, safePage, pages, total)
+        }
+    }
+
+    fun resolveReview(entryId: Long, action: String, adminName: String): CompletableFuture<Boolean> = supplyAsync {
+        transaction { connection ->
+            val target = connection.prepareStatement("SELECT player_uuid,claim_token FROM reward_inbox WHERE id=? AND status='REVIEW'").use {
+                it.setLong(1, entryId); it.executeQuery().use { result -> if (result.next()) result.getString(1) to result.getString(2) else return@transaction false }
+            }
+            val normalized = action.uppercase(Locale.ROOT)
+            val changed = when (normalized) {
+                "RESTORE" -> connection.prepareStatement("UPDATE reward_inbox SET status='PENDING',claim_token=NULL,claim_started_at=NULL WHERE id=? AND status='REVIEW'").use { it.setLong(1, entryId); it.executeUpdate() }
+                "CONFIRM", "VOID" -> connection.prepareStatement("DELETE FROM reward_inbox WHERE id=? AND status='REVIEW'").use { it.setLong(1, entryId); it.executeUpdate() }
+                else -> throw IllegalArgumentException("Unsupported review action: $action")
+            }
+            if (changed == 1) {
+                insertAudit(connection, adminName, "REVIEW_$normalized", "INBOX", entryId.toString(), "token=${target.second.orEmpty()}")
+                refreshCount(connection, UUID.fromString(target.first))
+            }
+            changed == 1
+        }
+    }
+
+    fun addAudit(adminName: String, action: String, targetType: String, targetId: String, detail: String = ""): CompletableFuture<Void> = runAsync {
+        open().use { insertAudit(it, adminName, action, targetType, targetId, detail.take(512)) }
+    }
+
+    fun exportRewardLogs(file: File): CompletableFuture<Int> = supplyAsync {
+        file.parentFile?.mkdirs()
+        open().use { connection -> Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8).use { writer ->
+            writer.appendLine("settlement_id,player_uuid,pool_id,reward_type,reward_key,amount,status,detail,created_at,updated_at")
+            connection.createStatement().use { statement -> statement.executeQuery("SELECT settlement_id,player_uuid,pool_id,reward_type,reward_key,amount,status,detail,created_at,updated_at FROM reward_ledger ORDER BY created_at DESC").use { result ->
+                var count = 0
+                while (result.next()) {
+                    val row = readRewardLog(result)
+                    writer.appendLine(listOf(row.settlementId,row.playerId,row.poolId,row.rewardType,row.rewardKey,row.amount,row.status,row.detail,row.createdAt,row.updatedAt).joinToString(",") { csv(it.toString()) })
+                    count++
+                }
+                count
+            } }
+        } }
+    }
+
+    private fun readStats(connection: Connection, playerId: UUID, period: StatsPeriod): PlayerStats {
+        val (source, where) = statsSource(period)
+        val row = connection.prepareStatement("SELECT COALESCE(MAX(player_name),''),COALESCE(SUM(seconds),0),COALESCE(SUM(cycles),0),COALESCE(SUM(rewards),0) FROM $source $where ${if (where.isBlank()) "WHERE" else "AND"} player_uuid=?").use {
+            var index = bindPeriod(it, period); it.setString(index, playerId.toString())
+            it.executeQuery().use { result -> result.next(); arrayOf(result.getString(1), result.getLong(2), result.getLong(3), result.getLong(4)) }
+        }
+        val longest = connection.prepareStatement("SELECT COALESCE(MAX(longest_session),0) FROM player_stats WHERE player_uuid=?").use {
+            it.setString(1, playerId.toString()); it.executeQuery().use { result -> result.next(); result.getLong(1) }
+        }
+        val score = row[1] as Long
+        val rank = if (score <= 0) 0 else connection.prepareStatement("""
+            SELECT 1+COUNT(*) FROM (SELECT player_uuid,SUM(seconds) score FROM $source $where GROUP BY player_uuid HAVING score>?)
+        """.trimIndent()).use {
+            var index = bindPeriod(it, period); it.setLong(index, score); it.executeQuery().use { result -> result.next(); result.getInt(1) }
+        }
+        return PlayerStats(playerId.toString(), (row[0] as String).ifBlank { playerId.toString().take(8) }, period, score, row[2] as Long, row[3] as Long, longest, rank)
+    }
+
+    private fun statsSource(period: StatsPeriod): Pair<String, String> = if (period == StatsPeriod.TOTAL) {
+        "(SELECT player_uuid,pool_id,player_name,total_seconds AS seconds,cycles,rewards FROM player_stats)" to ""
+    } else "player_period_stats" to "WHERE period_type=? AND period_key=?"
+
+    private fun bindPeriod(statement: java.sql.PreparedStatement, period: StatsPeriod): Int {
+        var index = 1
+        if (period != StatsPeriod.TOTAL) { statement.setString(index++, period.name); statement.setString(index++, periodKey(period)) }
+        return index
+    }
+
+    private fun periodKey(period: StatsPeriod): String {
+        val zone = runCatching { ZoneId.of(statisticsTimeZone()) }.getOrDefault(ZoneId.systemDefault())
+        val date = LocalDate.now(zone)
+        return when (period) {
+            StatsPeriod.DAY -> date.toString()
+            StatsPeriod.WEEK -> "%04d-W%02d".format(date.get(WeekFields.ISO.weekBasedYear()), date.get(WeekFields.ISO.weekOfWeekBasedYear()))
+            StatsPeriod.MONTH -> "%04d-%02d".format(date.year, date.monthValue)
+            StatsPeriod.TOTAL -> "total"
+        }
+    }
+
+    private fun readRewardLog(result: ResultSet) = RewardLogEntry(
+        result.getString(1), result.getString(2), result.getString(3), result.getString(4), result.getString(5),
+        result.getDouble(6), result.getString(7), result.getString(8), Instant.ofEpochSecond(result.getLong(9)), Instant.ofEpochSecond(result.getLong(10)),
+    )
+
+    private fun insertAudit(connection: Connection, adminName: String, action: String, targetType: String, targetId: String, detail: String) {
+        connection.prepareStatement("INSERT INTO admin_audit_log(admin_name,action,target_type,target_id,detail,created_at) VALUES(?,?,?,?,?,?)").use {
+            it.setString(1, adminName); it.setString(2, action); it.setString(3, targetType); it.setString(4, targetId)
+            it.setString(5, detail); it.setLong(6, now()); it.executeUpdate()
+        }
+    }
+    private fun csv(value: String) = "\"${value.replace("\"", "\"\"")}\""
+
     private fun selectInbox(connection: Connection, playerId: UUID, limit: Int, offset: Int): List<InboxEntry> =
         connection.prepareStatement("SELECT id,pool_id,provider,item_id,amount,display_name,created_at FROM reward_inbox WHERE player_uuid=? AND status='PENDING' ORDER BY id LIMIT ? OFFSET ?").use { statement ->
             statement.setString(1, playerId.toString()); statement.setInt(2, limit); statement.setInt(3, offset)
@@ -309,12 +588,12 @@ class SqliteStore(private val plugin: JavaPlugin, databaseFile: File) : AutoClos
     private fun runAsync(action: () -> Unit): CompletableFuture<Void> = CompletableFuture.runAsync({ sqlGuard(action) }, executor)
     private fun <T> supplyAsync(action: () -> T): CompletableFuture<T> = CompletableFuture.supplyAsync({ sqlGuard(action) }, executor)
     private fun <T> sqlGuard(action: () -> T): T = try { action() } catch (exception: SQLException) {
-        plugin.logger.log(Level.SEVERE, "SQLite operation failed", exception); throw IllegalStateException(exception)
+        logger.log(Level.SEVERE, "SQLite operation failed", exception); throw IllegalStateException(exception)
     }
 
     override fun close() {
         executor.shutdown()
-        try { if (!executor.awaitTermination(5, TimeUnit.SECONDS)) plugin.logger.warning("SQLite executor did not stop within 5 seconds.") }
+        try { if (!executor.awaitTermination(5, TimeUnit.SECONDS)) logger.warning("SQLite executor did not stop within 5 seconds.") }
         catch (_: InterruptedException) { Thread.currentThread().interrupt() }
     }
 

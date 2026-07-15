@@ -15,6 +15,7 @@ import top.cnuo.idlepool.storage.InboxEntry
 import top.cnuo.idlepool.storage.InboxPage
 import top.cnuo.idlepool.storage.SqliteStore
 import top.cnuo.idlepool.util.Messages
+import top.cnuo.idlepool.api.event.IdlePoolInboxClaimEvent
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -137,7 +138,10 @@ class InboxGuiManager(
                 store.markClaimReview(player.uniqueId, reservation.token, inserted, failure?.message ?: "commit-rejected")
                 Messages.send(player, "inbox.review-required")
                 done(inserted, false)
-            } else done(inserted, leftovers == 0)
+            } else {
+                Bukkit.getPluginManager().callEvent(IdlePoolInboxClaimEvent(player, entry, inserted))
+                done(inserted, leftovers == 0)
+            }
         } }
     }
 

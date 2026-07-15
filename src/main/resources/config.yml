@@ -1,6 +1,6 @@
 # 配置结构版本由插件自动维护，请勿手动降低。
 # Configuration schema version is maintained automatically; do not downgrade it.
-config-version: 2
+config-version: 3
 
 # 数据库与定时保存设置。
 # Database and periodic checkpoint settings.
@@ -30,6 +30,17 @@ progress:
 # ActionBar text is configured as actionbar.format in the selected language file.
 actionbar:
   enabled: true
+
+# 可选 BossBar；Optional BossBar display.
+bossbar:
+  enabled: false
+  color: YELLOW
+  overlay: PROGRESS
+
+# 排行榜周期按此时区计算；Leaderboard periods use this time zone.
+statistics:
+  time-zone: "Asia/Shanghai"
+  leaderboard-size: 45
 
 # ItemsAdder 字体图片 ID；ItemsAdder 不可用时会自动退回纯文本。
 # ItemsAdder font-image IDs; plain text is used when ItemsAdder is unavailable.

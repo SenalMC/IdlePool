@@ -13,6 +13,7 @@ import top.cnuo.idlepool.gui.PoolGuiManager
 import top.cnuo.idlepool.pool.PoolRepository
 import top.cnuo.idlepool.session.SessionManager
 import top.cnuo.idlepool.storage.SqliteStore
+import top.cnuo.idlepool.api.event.IdlePoolStopReason
 import java.util.UUID
 
 class PoolPresenceListener(
@@ -28,12 +29,13 @@ class PoolPresenceListener(
     fun onMove(event: PlayerMoveEvent) { if (changedBlock(event.from, event.to)) handlePosition(event.player, event.to) }
     @EventHandler fun onJoin(event: PlayerJoinEvent) {
         store.refreshInboxCount(event.player.uniqueId)
+        store.refreshStats(event.player.uniqueId)
         schedule(event.player)
     }
     @EventHandler fun onWorld(event: PlayerChangedWorldEvent) { observedPool.remove(event.player.uniqueId); schedule(event.player) }
     @EventHandler fun onRespawn(event: PlayerRespawnEvent) { observedPool.remove(event.player.uniqueId); schedule(event.player) }
-    @EventHandler fun onDeath(event: PlayerDeathEvent) { observedPool.remove(event.entity.uniqueId); sessions.stop(event.entity, false, false) }
-    @EventHandler fun onQuit(event: PlayerQuitEvent) { observedPool.remove(event.player.uniqueId); sessions.stop(event.player, false, false) }
+    @EventHandler fun onDeath(event: PlayerDeathEvent) { observedPool.remove(event.entity.uniqueId); sessions.stop(event.entity, false, false, IdlePoolStopReason.DEATH) }
+    @EventHandler fun onQuit(event: PlayerQuitEvent) { observedPool.remove(event.player.uniqueId); sessions.stop(event.player, false, false, IdlePoolStopReason.QUIT) }
 
     private fun handlePosition(player: Player, location: Location) {
         val active = sessions.find(player.uniqueId).orElse(null)
